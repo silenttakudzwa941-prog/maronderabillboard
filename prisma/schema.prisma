@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Advertiser {
+  id           String   @id
+  businessName String
+  email        String   @unique
+  phone        String
+  createdAt    DateTime @default(now())
+
+  ads    Ad[]
+  orders Order[]
+}
+
+model Ad {
+  id           String   @id
+  title        String
+  mediaUrl     String
+  mediaType    String
+  duration     Int?
+  category     String
+  status       String   @default("pending")
+  views        Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  advertiserId String
+  createdAt    DateTime @default(now())
+
+  advertiser Advertiser @relation(fields: [advertiserId], references: [id])
+}
+
+model Order {
+  id           String @id @default(cuid())
+  orderNumber  String @unique
+  advertiserId String
+
+  packageId   String
+  packageName String
+
+  billboardPrice        Decimal @db.Decimal(10, 2)
+  socialMediaTotal      Decimal @default(0) @db.Decimal(10, 2)
+  campaignManagementFee Decimal @default(0) @db.Decimal(10, 2)
+  totalPrice            Decimal @db.Decimal(10, 2)
+
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  advertiser Advertiser @relation(fields: [advertiserId], references: [id])
+  payment    Payment?
+}
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String @unique
+
+  paymentMethod    String
+  paymentReference String
+
+  amount Decimal @db.Decimal(10, 2)
+
+  status     String    @default("pending")
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
