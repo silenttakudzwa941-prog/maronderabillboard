@@ -1,6 +1,6 @@
-"use client";
 
-import { useMemo, useState } from "react";
+
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -49,7 +49,7 @@ const socialPlatformPricing = {
 
 const campaignManagementFee = 5;
 
-export default function CreateAdvertisement() {
+function CreateAdvertisementContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -68,7 +68,22 @@ export default function CreateAdvertisement() {
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreviewUrl, setMediaPreviewUrl] = useState("");
   const [socialPlatforms, setSocialPlatforms] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!mediaFile || advertisementType !== "image") {
+      setMediaPreviewUrl("");
+      return;
+    }
+
+    const url = URL.createObjectURL(mediaFile);
+    setMediaPreviewUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [mediaFile, advertisementType]);
 
   // SOCIAL MEDIA PRICING
   const socialMediaTotal = socialPlatforms.reduce((total, platform) => {
@@ -177,7 +192,7 @@ export default function CreateAdvertisement() {
       {/* HEADER */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
               MB
             </div>
@@ -191,14 +206,14 @@ export default function CreateAdvertisement() {
                 Your Local Advertising Platform
               </div>
             </div>
-          </link>
+          </Link>
 
-          <link
+          <Link
             href="/advertise"
             className="text-sm font-bold text-slate-600 hover:text-blue-900"
           >
             ← Change Package
-          </link>
+          </Link>
         </div>
       </header>
 
@@ -824,7 +839,7 @@ export default function CreateAdvertisement() {
                   <div className="flex aspect-video items-center justify-center bg-slate-200">
                     {mediaFile && advertisementType === "image" ? (
                       <img
-                        src={URL.createObjectURL(mediaFile)}
+                        src={mediaPreviewUrl}
                         alt="Advertisement preview"
                         className="h-full w-full object-cover"
                       />
@@ -979,5 +994,13 @@ export default function CreateAdvertisement() {
         reserved.
       </footer>
     </main>
+  );
+}
+
+export default function CreateAdvertisement() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateAdvertisementContent />
+    </Suspense>
   );
 }
