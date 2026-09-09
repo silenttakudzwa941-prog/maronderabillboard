@@ -50,6 +50,8 @@ type AdvertisementData = {
   startDate: string;
   endDate: string;
   mediaFileName: string | null;
+  mediaUrl: string;
+mediaType: "image" | "video";
   socialPlatforms?: string[];
   socialMediaTotal?: number;
   campaignManagementFee?: number;
@@ -160,11 +162,45 @@ const [submitError, setSubmitError] = useState("");
     },
 
     body: JSON.stringify({
-      packageId,
-      socialPlatforms,
-      paymentMethod,
-      paymentReference: paymentReference.trim(),
-    }),
+  packageId,
+
+  businessName:
+    advertisementData.businessName,
+
+  advertisementTitle:
+    advertisementData.advertisementTitle,
+
+  description:
+    advertisementData.description,
+
+  whatsapp:
+    advertisementData.whatsapp,
+
+  advertisementType:
+    advertisementData.advertisementType,
+
+  location:
+    advertisementData.location,
+
+  startDate:
+    advertisementData.startDate,
+
+  endDate:
+    advertisementData.endDate,
+
+  mediaUrl:
+    advertisementData.mediaUrl,
+
+  mediaType:
+    advertisementData.mediaType,
+
+  socialPlatforms,
+
+  paymentMethod,
+
+  paymentReference:
+    paymentReference.trim(),
+}),
   });
 
  

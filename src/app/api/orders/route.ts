@@ -9,12 +9,14 @@ const packages = {
     duration: 7,
     advertisements: 1,
   },
+
   business: {
     name: "Business",
     price: 12,
     duration: 14,
     advertisements: 3,
   },
+
   premium: {
     name: "Premium",
     price: 25,
@@ -41,7 +43,10 @@ type PaymentMethod =
 
 export async function POST(request: Request) {
   try {
-    // Get the currently logged-in Supabase user
+    // --------------------------------------------------
+    // 1. CHECK AUTHENTICATION
+    // --------------------------------------------------
+
     const supabase = await createClient();
 
     const {
@@ -59,18 +64,42 @@ export async function POST(request: Request) {
       );
     }
 
+    // --------------------------------------------------
+    // 2. READ REQUEST
+    // --------------------------------------------------
+
     const body = await request.json();
 
     const {
       packageId,
+
+      businessName,
+      advertisementTitle,
+      description,
+      whatsapp,
+
+      advertisementType,
+      location,
+      startDate,
+      endDate,
+
+      mediaUrl,
+      mediaType,
+
       socialPlatforms,
+
       paymentMethod,
       paymentReference,
     } = body;
 
-    // Validate package
+    // --------------------------------------------------
+    // 3. VALIDATE PACKAGE
+    // --------------------------------------------------
+
     const selectedPackage =
-      packages[packageId as keyof typeof packages];
+      packages[
+        packageId as keyof typeof packages
+      ];
 
     if (!selectedPackage) {
       return NextResponse.json(
@@ -81,7 +110,63 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate payment method
+    // --------------------------------------------------
+    // 4. VALIDATE ADVERTISEMENT
+    // --------------------------------------------------
+
+    if (
+      typeof businessName !== "string" ||
+      !businessName.trim()
+    ) {
+      return NextResponse.json(
+        {
+          error: "Business name is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof advertisementTitle !== "string" ||
+      !advertisementTitle.trim()
+    ) {
+      return NextResponse.json(
+        {
+          error: "Advertisement title is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof mediaUrl !== "string" ||
+      !mediaUrl.trim()
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Advertisement media is missing. Please upload your advertisement again.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      mediaType !== "image" &&
+      mediaType !== "video"
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid advertisement media type.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // --------------------------------------------------
+    // 5. VALIDATE PAYMENT
+    // --------------------------------------------------
+
     if (
       !allowedPaymentMethods.includes(
         paymentMethod as PaymentMethod
@@ -95,7 +180,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate payment reference
     if (
       typeof paymentReference !== "string" ||
       !paymentReference.trim()
@@ -108,7 +192,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate social media platforms
+    // --------------------------------------------------
+    // 6. CALCULATE SOCIAL MEDIA PRICING
+    // --------------------------------------------------
+
     const requestedPlatforms = Array.isArray(
       socialPlatforms
     )
@@ -124,12 +211,10 @@ export async function POST(request: Request) {
           platform in socialPlatformPricing
       );
 
-    // Remove duplicates
     const uniquePlatforms = [
       ...new Set(validPlatforms),
     ];
 
-    // Calculate social media charges on the server
     const socialMediaTotal =
       uniquePlatforms.reduce(
         (total, platform) =>
@@ -138,98 +223,192 @@ export async function POST(request: Request) {
         0
       );
 
-    // Campaign management is $5 when social media
-    // promotion is selected
     const campaignManagementFee =
       uniquePlatforms.length > 0 ? 5 : 0;
 
-    // Calculate final price on the server
+    // --------------------------------------------------
+    // 7. CALCULATE FINAL PRICE ON SERVER
+    // --------------------------------------------------
+
     const totalPrice =
       selectedPackage.price +
       socialMediaTotal +
       campaignManagementFee;
 
-    // Generate unique order number
-    const orderNumber = `MB-${Date.now()}-${Math.floor(
-      Math.random() * 1000
-    )}`;
+    // --------------------------------------------------
+    // 8. GENERATE ORDER NUMBER
+    // --------------------------------------------------
 
-    // Create Order + Payment together
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
+    const orderNumber =
+      `MB-${Date.now()}-${Math.floor(
+        Math.random() * 1000
+      )}`;
 
-        // IMPORTANT:
-        // Use the authenticated Supabase user's ID
-        advertiserId: user.id,
+    // --------------------------------------------------
+    // 9. CREATE ORDER + PAYMENT + AD
+    // --------------------------------------------------
 
-        packageId,
-        packageName: selectedPackage.name,
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const order = await tx.order.create({
+          data: {
+            orderNumber,
 
-        billboardPrice: selectedPackage.price,
-        socialMediaTotal,
-        campaignManagementFee,
-        totalPrice,
+            advertiserId: user.id,
 
-        status: "payment_submitted",
+            packageId,
+            packageName: selectedPackage.name,
 
-        payment: {
-          create: {
-            paymentMethod,
-            paymentReference:
-              paymentReference.trim(),
-            amount: totalPrice,
-            status: "pending",
+            billboardPrice:
+              selectedPackage.price,
+
+            socialMediaTotal,
+
+            campaignManagementFee,
+
+            totalPrice,
+
+            status: "payment_submitted",
+
+            payment: {
+              create: {
+                paymentMethod,
+
+                paymentReference:
+                  paymentReference.trim(),
+
+                amount: totalPrice,
+
+                status: "pending",
+              },
+            },
           },
-        },
-      },
 
-      include: {
-        payment: true,
-      },
-    });
+          include: {
+            payment: true,
+          },
+        });
+
+        const ad = await tx.ad.create({
+          data: {
+            id: crypto.randomUUID(),
+
+            title:
+              advertisementTitle.trim(),
+
+            mediaUrl:
+              mediaUrl.trim(),
+
+            mediaType,
+
+            duration:
+              selectedPackage.duration,
+
+            category:
+              location?.trim() || "General",
+
+            status: "pending",
+
+            advertiserId: user.id,
+          },
+        });
+
+        return {
+          order,
+          ad,
+        };
+      }
+    );
+
+    // --------------------------------------------------
+    // 10. RETURN RESULT
+    // --------------------------------------------------
 
     return NextResponse.json({
       success: true,
 
       order: {
-        id: order.id,
-        orderNumber: order.orderNumber,
-        packageId: order.packageId,
-        packageName: order.packageName,
+        id: result.order.id,
+
+        orderNumber:
+          result.order.orderNumber,
+
+        packageId:
+          result.order.packageId,
+
+        packageName:
+          result.order.packageName,
 
         billboardPrice:
-          Number(order.billboardPrice),
+          Number(
+            result.order.billboardPrice
+          ),
 
         socialMediaTotal:
-          Number(order.socialMediaTotal),
+          Number(
+            result.order.socialMediaTotal
+          ),
 
         campaignManagementFee:
           Number(
-            order.campaignManagementFee
+            result.order
+              .campaignManagementFee
           ),
 
         totalPrice:
-          Number(order.totalPrice),
+          Number(
+            result.order.totalPrice
+          ),
 
-        status: order.status,
-        createdAt: order.createdAt,
+        status:
+          result.order.status,
+
+        createdAt:
+          result.order.createdAt,
       },
 
-      payment: order.payment
+      advertisement: {
+        id: result.ad.id,
+
+        title:
+          result.ad.title,
+
+        mediaUrl:
+          result.ad.mediaUrl,
+
+        mediaType:
+          result.ad.mediaType,
+
+        duration:
+          result.ad.duration,
+
+        status:
+          result.ad.status,
+      },
+
+      payment: result.order.payment
         ? {
-            id: order.payment.id,
+            id:
+              result.order.payment.id,
+
             paymentMethod:
-              order.payment.paymentMethod,
+              result.order.payment
+                .paymentMethod,
 
             paymentReference:
-              order.payment.paymentReference,
+              result.order.payment
+                .paymentReference,
 
             amount:
-              Number(order.payment.amount),
+              Number(
+                result.order.payment.amount
+              ),
 
-            status: order.payment.status,
-            createdAt: order.payment.createdAt,
+            status:
+              result.order.payment.status,
+
+            createdAt:
+              result.order.payment.createdAt,
           }
         : null,
     });
