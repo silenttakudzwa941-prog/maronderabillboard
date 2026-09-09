@@ -51,7 +51,7 @@ type AdvertisementData = {
   endDate: string;
   mediaFileName: string | null;
   mediaUrl: string;
-mediaType: "image" | "video";
+  mediaType: "image" | "video";
   socialPlatforms?: string[];
   socialMediaTotal?: number;
   campaignManagementFee?: number;
@@ -64,7 +64,8 @@ function AdvertisementPaymentContent() {
   const packageId = searchParams.get("package") || "starter";
 
   const selectedPackage =
-    packages[packageId as keyof typeof packages] || packages.starter;
+    packages[packageId as keyof typeof packages] ||
+    packages.starter;
 
   const [advertisement, setAdvertisement] =
     useState<AdvertisementData | null>(null);
@@ -77,11 +78,11 @@ function AdvertisementPaymentContent() {
 
   const [submitted, setSubmitted] = useState(false);
 
-const [orderNumber, setOrderNumber] = useState("");
+  const [orderNumber, setOrderNumber] = useState("");
 
-const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-const [submitError, setSubmitError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const saved = sessionStorage.getItem(
@@ -94,17 +95,24 @@ const [submitError, setSubmitError] = useState("");
 
         const safeAdvertisement: AdvertisementData = {
           ...parsed,
-          socialPlatforms: Array.isArray(parsed.socialPlatforms)
+
+          socialPlatforms: Array.isArray(
+            parsed.socialPlatforms
+          )
             ? parsed.socialPlatforms
             : [],
+
           socialMediaTotal:
             typeof parsed.socialMediaTotal === "number"
               ? parsed.socialMediaTotal
               : 0,
+
           campaignManagementFee:
-            typeof parsed.campaignManagementFee === "number"
+            typeof parsed.campaignManagementFee ===
+            "number"
               ? parsed.campaignManagementFee
               : 0,
+
           totalPrice:
             typeof parsed.totalPrice === "number"
               ? parsed.totalPrice
@@ -118,21 +126,26 @@ const [submitError, setSubmitError] = useState("");
     }
   }, [selectedPackage.price]);
 
-  const socialPlatforms = advertisement?.socialPlatforms ?? [];
+  const socialPlatforms =
+    advertisement?.socialPlatforms ?? [];
 
   const calculateSocialMediaTotal = () => {
-    return socialPlatforms.reduce((total, platform) => {
-      const price =
-        socialPlatformPricing[
-          platform as keyof typeof socialPlatformPricing
-        ];
+    return socialPlatforms.reduce(
+      (total, platform) => {
+        const price =
+          socialPlatformPricing[
+            platform as keyof typeof socialPlatformPricing
+          ];
 
-      return total + (price || 0);
-    }, 0);
+        return total + (price || 0);
+      },
+      0
+    );
   };
 
   const socialMediaTotal =
-    advertisement?.socialMediaTotal ?? calculateSocialMediaTotal();
+    advertisement?.socialMediaTotal ??
+    calculateSocialMediaTotal();
 
   const campaignManagementFee =
     advertisement?.campaignManagementFee ??
@@ -145,129 +158,169 @@ const [submitError, setSubmitError] = useState("");
       campaignManagementFee;
 
   const handleSubmit = async () => {
-  if (!paymentReference.trim()) {
-    setSubmitError("Please enter your payment reference.");
-    return;
-  }
-
-  setSubmitting(true);
-  setSubmitError("");
-
-  try {
-  const response = await fetch("/api/orders", {
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify({
-  packageId,
-
-  businessName:
-    advertisementData.businessName,
-
-  advertisementTitle:
-    advertisementData.advertisementTitle,
-
-  description:
-    advertisementData.description,
-
-  whatsapp:
-    advertisementData.whatsapp,
-
-  advertisementType:
-    advertisementData.advertisementType,
-
-  location:
-    advertisementData.location,
-
-  startDate:
-    advertisementData.startDate,
-
-  endDate:
-    advertisementData.endDate,
-
-  mediaUrl:
-    advertisementData.mediaUrl,
-
-  mediaType:
-    advertisementData.mediaType,
-
-  socialPlatforms,
-
-  paymentMethod,
-
-  paymentReference:
-    paymentReference.trim(),
-}),
-  });
-
- 
-
-  // continue with the rest of your existing code...
-    const data = await response.json();
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = `/advertiser/login?redirect=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`;
-
-        return;
-      }
-
-      throw new Error(
-        data.error || "Failed to submit your order."
+    if (!advertisement) {
+      setSubmitError(
+        "Advertisement details are missing. Please go back and try again."
       );
+      return;
     }
 
-    /*
-     * Keep a local copy for the success screen only.
-     * The real order now exists in the database.
-     */
-    sessionStorage.setItem(
-      "marondera-billboard-order",
-      JSON.stringify({
-        ...advertisement,
-        packageId,
-        packageName: selectedPackage.name,
-        amount: data.order.totalPrice,
-        socialPlatforms,
-        socialMediaTotal: data.order.socialMediaTotal,
-        campaignManagementFee:
-          data.order.campaignManagementFee,
-        totalPrice: data.order.totalPrice,
-        paymentMethod,
-        paymentReference: data.payment.paymentReference,
-        submittedAt: data.order.createdAt,
-        status: data.order.status,
-        orderNumber: data.order.orderNumber,
-        databaseOrderId: data.order.id,
-      })
-    );
+    if (!paymentReference.trim()) {
+      setSubmitError(
+        "Please enter your payment reference."
+      );
+      return;
+    }
 
-    setOrderNumber(data.order.orderNumber);
-    setSubmitted(true);
-  } catch (error) {
-    console.error("Payment submission error:", error);
+    setSubmitting(true);
+    setSubmitError("");
 
-    setSubmitError(
-      error instanceof Error
-        ? error.message
-        : "Something went wrong. Please try again."
-    );
-  } finally {
-    setSubmitting(false);
-  }
-};
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          packageId,
+
+          businessName:
+            advertisement.businessName,
+
+          advertisementTitle:
+            advertisement.advertisementTitle,
+
+          description:
+            advertisement.description,
+
+          whatsapp:
+            advertisement.whatsapp,
+
+          advertisementType:
+            advertisement.advertisementType,
+
+          location:
+            advertisement.location,
+
+          startDate:
+            advertisement.startDate,
+
+          endDate:
+            advertisement.endDate,
+
+          mediaUrl:
+            advertisement.mediaUrl,
+
+          mediaType:
+            advertisement.mediaType,
+
+          socialPlatforms,
+
+          paymentMethod,
+
+          paymentReference:
+            paymentReference.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href =
+            `/advertiser/login?redirect=${encodeURIComponent(
+              window.location.pathname +
+                window.location.search
+            )}`;
+
+          return;
+        }
+
+        throw new Error(
+          data.error ||
+            "Failed to submit your order."
+        );
+      }
+
+      sessionStorage.setItem(
+        "marondera-billboard-order",
+        JSON.stringify({
+          ...advertisement,
+
+          packageId,
+
+          packageName:
+            selectedPackage.name,
+
+          amount:
+            data.order.totalPrice,
+
+          socialPlatforms,
+
+          socialMediaTotal:
+            data.order.socialMediaTotal,
+
+          campaignManagementFee:
+            data.order
+              .campaignManagementFee,
+
+          totalPrice:
+            data.order.totalPrice,
+
+          paymentMethod,
+
+          paymentReference:
+            data.payment.paymentReference,
+
+          submittedAt:
+            data.order.createdAt,
+
+          status:
+            data.order.status,
+
+          orderNumber:
+            data.order.orderNumber,
+
+          databaseOrderId:
+            data.order.id,
+
+          databaseAdvertisementId:
+            data.advertisement?.id,
+        })
+      );
+
+      setOrderNumber(
+        data.order.orderNumber
+      );
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error(
+        "Payment submission error:",
+        error
+      );
+
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (submitted) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-900">
-        {/* HEADER */}
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center px-6 py-4">
-            <Link href="/" className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="flex items-center gap-3"
+            >
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
                 MB
               </div>
@@ -285,7 +338,6 @@ const [submitError, setSubmitError] = useState("");
           </div>
         </header>
 
-        {/* SUCCESS */}
         <section className="px-6 py-20">
           <div className="mx-auto max-w-2xl text-center">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-4xl">
@@ -305,7 +357,6 @@ const [submitError, setSubmitError] = useState("");
               waiting for payment verification and approval.
             </p>
 
-            {/* ORDER CARD */}
             <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-7 text-left shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-200 pb-5">
                 <div>
@@ -325,7 +376,9 @@ const [submitError, setSubmitError] = useState("");
 
               <div className="mt-6 space-y-4 text-sm">
                 <div className="flex justify-between gap-4">
-                  <span className="text-slate-500">Business</span>
+                  <span className="text-slate-500">
+                    Business
+                  </span>
 
                   <span className="text-right font-bold text-slate-800">
                     {advertisement?.businessName}
@@ -333,7 +386,9 @@ const [submitError, setSubmitError] = useState("");
                 </div>
 
                 <div className="flex justify-between gap-4">
-                  <span className="text-slate-500">Advertisement</span>
+                  <span className="text-slate-500">
+                    Advertisement
+                  </span>
 
                   <span className="text-right font-bold text-slate-800">
                     {advertisement?.advertisementTitle}
@@ -341,7 +396,9 @@ const [submitError, setSubmitError] = useState("");
                 </div>
 
                 <div className="flex justify-between gap-4">
-                  <span className="text-slate-500">Package</span>
+                  <span className="text-slate-500">
+                    Package
+                  </span>
 
                   <span className="font-bold text-slate-800">
                     {selectedPackage.name}
@@ -358,22 +415,33 @@ const [submitError, setSubmitError] = useState("");
                       🖥️ MaronderaBillboard
                     </span>
 
-                    {socialPlatforms.map((platform) => (
-                      <span
-                        key={platform}
-                        className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700"
-                      >
-                        {platform === "facebook" && "📘 Facebook"}
-                        {platform === "instagram" && "📸 Instagram"}
-                        {platform === "tiktok" && "🎵 TikTok"}
-                        {platform === "whatsapp" && "💬 WhatsApp"}
-                      </span>
-                    ))}
+                    {socialPlatforms.map(
+                      (platform) => (
+                        <span
+                          key={platform}
+                          className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700"
+                        >
+                          {platform === "facebook" &&
+                            "📘 Facebook"}
+
+                          {platform === "instagram" &&
+                            "📸 Instagram"}
+
+                          {platform === "tiktok" &&
+                            "🎵 TikTok"}
+
+                          {platform === "whatsapp" &&
+                            "💬 WhatsApp"}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
 
                 <div className="flex justify-between gap-4">
-                  <span className="text-slate-500">Location</span>
+                  <span className="text-slate-500">
+                    Location
+                  </span>
 
                   <span className="font-bold text-slate-800">
                     {advertisement?.location}
@@ -431,7 +499,6 @@ const [submitError, setSubmitError] = useState("");
           </div>
         </section>
 
-        {/* FOOTER */}
         <footer className="bg-slate-950 px-6 py-8 text-center text-sm text-slate-400">
           © {new Date().getFullYear()} MaronderaBillboard. All rights
           reserved.
@@ -442,10 +509,12 @@ const [submitError, setSubmitError] = useState("");
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      {/* HEADER */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+          >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
               MB
             </div>
@@ -470,7 +539,6 @@ const [submitError, setSubmitError] = useState("");
         </div>
       </header>
 
-      {/* INTRO */}
       <section className="px-6 pb-8 pt-14">
         <div className="mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-900">
@@ -488,7 +556,6 @@ const [submitError, setSubmitError] = useState("");
         </div>
       </section>
 
-      {/* PROGRESS */}
       <section className="px-6 pb-10">
         <div className="mx-auto flex max-w-3xl items-center justify-center">
           <div className="flex items-center text-blue-900">
@@ -527,12 +594,9 @@ const [submitError, setSubmitError] = useState("");
         </div>
       </section>
 
-      {/* CONTENT */}
       <section className="mx-auto max-w-7xl px-6 pb-24">
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-          {/* LEFT */}
           <div className="space-y-8">
-            {/* ADVERTISEMENT SUMMARY */}
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-5">
                 <div>
@@ -558,7 +622,8 @@ const [submitError, setSubmitError] = useState("");
                   </div>
 
                   <div className="mt-1 font-bold text-slate-800">
-                    {advertisement?.businessName || "Not provided"}
+                    {advertisement?.businessName ||
+                      "Not provided"}
                   </div>
                 </div>
 
@@ -568,7 +633,8 @@ const [submitError, setSubmitError] = useState("");
                   </div>
 
                   <div className="mt-1 font-bold text-slate-800">
-                    {advertisement?.whatsapp || "Not provided"}
+                    {advertisement?.whatsapp ||
+                      "Not provided"}
                   </div>
                 </div>
 
@@ -578,7 +644,9 @@ const [submitError, setSubmitError] = useState("");
                   </div>
 
                   <div className="mt-1 font-bold text-slate-800">
-                    📍 {advertisement?.location || "Not selected"}
+                    📍{" "}
+                    {advertisement?.location ||
+                      "Not selected"}
                   </div>
                 </div>
 
@@ -588,13 +656,13 @@ const [submitError, setSubmitError] = useState("");
                   </div>
 
                   <div className="mt-1 font-bold text-slate-800">
-                    {advertisement?.advertisementType === "video"
+                    {advertisement?.advertisementType ===
+                    "video"
                       ? "🎥 Video"
                       : "🖼️ Image"}
                   </div>
                 </div>
 
-                {/* ADVERTISING PLATFORMS */}
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
                     Advertising Platforms
@@ -605,17 +673,26 @@ const [submitError, setSubmitError] = useState("");
                       🖥️ MaronderaBillboard
                     </span>
 
-                    {socialPlatforms.map((platform) => (
-                      <span
-                        key={platform}
-                        className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700"
-                      >
-                        {platform === "facebook" && "📘 Facebook"}
-                        {platform === "instagram" && "📸 Instagram"}
-                        {platform === "tiktok" && "🎵 TikTok"}
-                        {platform === "whatsapp" && "💬 WhatsApp"}
-                      </span>
-                    ))}
+                    {socialPlatforms.map(
+                      (platform) => (
+                        <span
+                          key={platform}
+                          className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700"
+                        >
+                          {platform === "facebook" &&
+                            "📘 Facebook"}
+
+                          {platform === "instagram" &&
+                            "📸 Instagram"}
+
+                          {platform === "tiktok" &&
+                            "🎵 TikTok"}
+
+                          {platform === "whatsapp" &&
+                            "💬 WhatsApp"}
+                        </span>
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -625,7 +702,8 @@ const [submitError, setSubmitError] = useState("");
                   </div>
 
                   <div className="mt-1 font-bold text-slate-800">
-                    {advertisement?.startDate || "Not selected"}
+                    {advertisement?.startDate ||
+                      "Not selected"}
                   </div>
                 </div>
 
@@ -635,12 +713,12 @@ const [submitError, setSubmitError] = useState("");
                   </div>
 
                   <div className="mt-1 font-bold text-slate-800">
-                    {advertisement?.endDate || "Not calculated"}
+                    {advertisement?.endDate ||
+                      "Not calculated"}
                   </div>
                 </div>
               </div>
 
-              {/* DESCRIPTION */}
               <div className="mt-6 border-t border-slate-200 pt-6">
                 <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
                   Description
@@ -652,7 +730,6 @@ const [submitError, setSubmitError] = useState("");
                 </p>
               </div>
 
-              {/* MEDIA FILE */}
               {advertisement?.mediaFileName && (
                 <div className="mt-6 rounded-xl bg-slate-50 p-4">
                   <div className="text-xs font-bold uppercase tracking-wide text-slate-400">
@@ -666,7 +743,6 @@ const [submitError, setSubmitError] = useState("");
               )}
             </div>
 
-            {/* PAYMENT */}
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
               <div>
                 <h2 className="text-2xl font-black text-blue-950">
@@ -679,12 +755,12 @@ const [submitError, setSubmitError] = useState("");
                 </p>
               </div>
 
-              {/* METHODS */}
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                {/* ECOCASH */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("ecocash")}
+                  onClick={() =>
+                    setPaymentMethod("ecocash")
+                  }
                   className={`rounded-2xl border-2 p-5 text-left transition ${
                     paymentMethod === "ecocash"
                       ? "border-green-500 bg-green-50"
@@ -702,10 +778,11 @@ const [submitError, setSubmitError] = useState("");
                   </div>
                 </button>
 
-                {/* BANK */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("bank")}
+                  onClick={() =>
+                    setPaymentMethod("bank")
+                  }
                   className={`rounded-2xl border-2 p-5 text-left transition ${
                     paymentMethod === "bank"
                       ? "border-blue-700 bg-blue-50"
@@ -723,10 +800,11 @@ const [submitError, setSubmitError] = useState("");
                   </div>
                 </button>
 
-                {/* CASH */}
                 <button
                   type="button"
-                  onClick={() => setPaymentMethod("cash")}
+                  onClick={() =>
+                    setPaymentMethod("cash")
+                  }
                   className={`rounded-2xl border-2 p-5 text-left transition ${
                     paymentMethod === "cash"
                       ? "border-yellow-500 bg-yellow-50"
@@ -745,7 +823,6 @@ const [submitError, setSubmitError] = useState("");
                 </button>
               </div>
 
-              {/* PAYMENT INSTRUCTIONS */}
               <div className="mt-6 rounded-2xl bg-slate-50 p-6">
                 {paymentMethod === "ecocash" && (
                   <>
@@ -758,7 +835,8 @@ const [submitError, setSubmitError] = useState("");
                       <strong>
                         ${totalPrice.toFixed(2)}
                       </strong>{" "}
-                      to the MaronderaBillboard EcoCash number.
+                      to the MaronderaBillboard EcoCash
+                      number.
                     </p>
 
                     <div className="mt-4 rounded-xl bg-white p-4">
@@ -784,7 +862,8 @@ const [submitError, setSubmitError] = useState("");
                       <strong>
                         ${totalPrice.toFixed(2)}
                       </strong>{" "}
-                      to the MaronderaBillboard bank account.
+                      to the MaronderaBillboard bank
+                      account.
                     </p>
 
                     <div className="mt-4 space-y-3 rounded-xl bg-white p-4 text-sm">
@@ -832,19 +911,20 @@ const [submitError, setSubmitError] = useState("");
                       <strong>
                         ${totalPrice.toFixed(2)}
                       </strong>{" "}
-                      advertising fee in person. Your advertisement
-                      will remain pending until payment is verified.
+                      advertising fee in person. Your
+                      advertisement will remain pending until
+                      payment is verified.
                     </p>
                   </>
                 )}
               </div>
-              {submitError && (
-  <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-    {submitError}
-  </div>
-)}
 
-              {/* REFERENCE */}
+              {submitError && (
+                <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+                  {submitError}
+                </div>
+              )}
+
               <div className="mt-6">
                 <label className="mb-2 block text-sm font-bold text-slate-700">
                   Payment Reference *
@@ -854,7 +934,9 @@ const [submitError, setSubmitError] = useState("");
                   type="text"
                   value={paymentReference}
                   onChange={(event) =>
-                    setPaymentReference(event.target.value)
+                    setPaymentReference(
+                      event.target.value
+                    )
                   }
                   placeholder="e.g. EcoCash transaction reference"
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
@@ -866,17 +948,16 @@ const [submitError, setSubmitError] = useState("");
                 </p>
               </div>
 
-              {/* SUBMIT */}
               <button
-  type="button"
-  onClick={handleSubmit}
-  disabled={submitting}
-  className="mt-8 w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
->
-  {submitting
-    ? "Submitting Order..."
-    : "Confirm Advertisement & Submit →"}
-</button>
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="mt-8 w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting
+                  ? "Submitting Order..."
+                  : "Confirm Advertisement & Submit →"}
+              </button>
 
               <p className="mt-3 text-center text-xs leading-5 text-slate-400">
                 Your advertisement will be reviewed after payment
@@ -885,7 +966,6 @@ const [submitError, setSubmitError] = useState("");
             </div>
           </div>
 
-          {/* RIGHT SUMMARY */}
           <aside className="lg:sticky lg:top-6 lg:self-start">
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
               <div className="bg-blue-950 p-6 text-white">
@@ -900,67 +980,69 @@ const [submitError, setSubmitError] = useState("");
 
               <div className="p-6">
                 <div className="space-y-4">
-                  {/* BASE PACKAGE */}
                   <div className="flex justify-between">
                     <span className="text-sm text-slate-500">
                       MaronderaBillboard
                     </span>
 
                     <span className="text-sm font-bold text-slate-800">
-                      ${selectedPackage.price.toFixed(2)}
+                      $
+                      {selectedPackage.price.toFixed(
+                        2
+                      )}
                     </span>
                   </div>
 
-                  {/* SOCIAL PLATFORMS */}
-                  {socialPlatforms.map((platform) => {
-                    const price =
-                      socialPlatformPricing[
-                        platform as keyof typeof socialPlatformPricing
-                      ] || 0;
+                  {socialPlatforms.map(
+                    (platform) => {
+                      const price =
+                        socialPlatformPricing[
+                          platform as keyof typeof socialPlatformPricing
+                        ] || 0;
 
-                    return (
-                      <div
-                        key={platform}
-                        className="flex justify-between"
-                      >
-                        <span className="flex items-center gap-2 text-sm text-slate-500">
-                          {platform === "facebook" && (
-                            <>
-                              <FaFacebook className="text-[#1877F2]" />
-                              Facebook
-                            </>
-                          )}
+                      return (
+                        <div
+                          key={platform}
+                          className="flex justify-between"
+                        >
+                          <span className="flex items-center gap-2 text-sm text-slate-500">
+                            {platform === "facebook" && (
+                              <>
+                                <FaFacebook className="text-[#1877F2]" />
+                                Facebook
+                              </>
+                            )}
 
-                          {platform === "instagram" && (
-                            <>
-                              <FaInstagram className="text-[#E4405F]" />
-                              Instagram
-                            </>
-                          )}
+                            {platform === "instagram" && (
+                              <>
+                                <FaInstagram className="text-[#E4405F]" />
+                                Instagram
+                              </>
+                            )}
 
-                          {platform === "tiktok" && (
-                            <>
-                              <FaTiktok className="text-black" />
-                              TikTok
-                            </>
-                          )}
+                            {platform === "tiktok" && (
+                              <>
+                                <FaTiktok className="text-black" />
+                                TikTok
+                              </>
+                            )}
 
-                          {platform === "whatsapp" && (
-                            <>
-                              <FaWhatsapp className="text-[#25D366]" />
-                              WhatsApp
-                            </>
-                          )}
-                        </span>
+                            {platform === "whatsapp" && (
+                              <>
+                                <FaWhatsapp className="text-[#25D366]" />
+                                WhatsApp
+                              </>
+                            )}
+                          </span>
 
-                        <span className="text-sm font-bold text-slate-800">
-                          ${price.toFixed(2)}
-                        </span>
-                      </div>
-                    );
-                  })}
+                          <span className="text-sm font-bold text-slate-800">
+                            ${price.toFixed(2)}
+                          </span>
+                        </div>
+                      );
+                    }
+                  )}
 
-                  {/* MANAGEMENT FEE */}
                   {socialPlatforms.length > 0 && (
                     <div className="flex justify-between">
                       <span className="text-sm text-slate-500">
@@ -968,13 +1050,15 @@ const [submitError, setSubmitError] = useState("");
                       </span>
 
                       <span className="text-sm font-bold text-slate-800">
-                        ${campaignManagementFee.toFixed(2)}
+                        $
+                        {campaignManagementFee.toFixed(
+                          2
+                        )}
                       </span>
                     </div>
                   )}
                 </div>
 
-                {/* TOTAL */}
                 <div className="mt-6 border-t border-slate-200 pt-6">
                   <div className="flex items-end justify-between">
                     <div>
@@ -993,15 +1077,14 @@ const [submitError, setSubmitError] = useState("");
                   </div>
                 </div>
 
-                {/* TRUST */}
                 <div className="mt-6 rounded-2xl bg-green-50 p-4">
                   <div className="font-black text-green-800">
                     🔒 Secure Submission
                   </div>
 
                   <p className="mt-1 text-xs leading-5 text-green-700">
-                    Your advertisement will only go live after payment
-                    verification and approval.
+                    Your advertisement will only go live after
+                    payment verification and approval.
                   </p>
                 </div>
               </div>
@@ -1010,7 +1093,6 @@ const [submitError, setSubmitError] = useState("");
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className="bg-slate-950 px-6 py-8 text-center text-sm text-slate-400">
         © {new Date().getFullYear()} MaronderaBillboard. All rights
         reserved.
