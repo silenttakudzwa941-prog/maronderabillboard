@@ -61,3 +61,8 @@ export type Order = Prisma.OrderModel
  * 
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model Admin
+ * 
+ */
+export type Admin = Prisma.AdminModel
