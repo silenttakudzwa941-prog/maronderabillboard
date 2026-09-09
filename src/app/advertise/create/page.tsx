@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -52,26 +53,36 @@ const campaignManagementFee = 5;
 function CreateAdvertisementContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+
   const [uploading, setUploading] = useState(false);
-const [error, setError] = useState("");
+  const [error, setError] = useState("");
 
   const packageId = searchParams.get("package") || "starter";
 
   const selectedPackage =
-    packages[packageId as keyof typeof packages] || packages.starter;
+    packages[packageId as keyof typeof packages] ||
+    packages.starter;
 
   const [businessName, setBusinessName] = useState("");
-  const [advertisementTitle, setAdvertisementTitle] = useState("");
+  const [advertisementTitle, setAdvertisementTitle] =
+    useState("");
   const [description, setDescription] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
-  const [advertisementType, setAdvertisementType] = useState<
-    "image" | "video"
-  >("image");
+
+  const [advertisementType, setAdvertisementType] =
+    useState<"image" | "video">("image");
+
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreviewUrl, setMediaPreviewUrl] = useState("");
-  const [socialPlatforms, setSocialPlatforms] = useState<string[]>([]);
+
+  const [mediaFile, setMediaFile] =
+    useState<File | null>(null);
+
+  const [mediaPreviewUrl, setMediaPreviewUrl] =
+    useState("");
+
+  const [socialPlatforms, setSocialPlatforms] =
+    useState<string[]>([]);
 
   useEffect(() => {
     if (!mediaFile || advertisementType !== "image") {
@@ -80,6 +91,7 @@ const [error, setError] = useState("");
     }
 
     const url = URL.createObjectURL(mediaFile);
+
     setMediaPreviewUrl(url);
 
     return () => {
@@ -88,20 +100,25 @@ const [error, setError] = useState("");
   }, [mediaFile, advertisementType]);
 
   // SOCIAL MEDIA PRICING
-  const socialMediaTotal = socialPlatforms.reduce((total, platform) => {
-    return (
-      total +
-      (socialPlatformPricing[
-        platform as keyof typeof socialPlatformPricing
-      ] || 0)
-    );
-  }, 0);
+  const socialMediaTotal = socialPlatforms.reduce(
+    (total, platform) => {
+      return (
+        total +
+        (socialPlatformPricing[
+          platform as keyof typeof socialPlatformPricing
+        ] || 0)
+      );
+    },
+    0
+  );
 
   // TOTAL PRICE
   const totalPrice =
     selectedPackage.price +
     socialMediaTotal +
-    (socialPlatforms.length > 0 ? campaignManagementFee : 0);
+    (socialPlatforms.length > 0
+      ? campaignManagementFee
+      : 0);
 
   // AUTOMATIC END DATE
   const endDate = useMemo(() => {
@@ -109,12 +126,14 @@ const [error, setError] = useState("");
 
     const date = new Date(startDate);
 
-    date.setDate(date.getDate() + selectedPackage.duration);
+    date.setDate(
+      date.getDate() + selectedPackage.duration
+    );
 
     return date.toISOString().split("T")[0];
   }, [startDate, selectedPackage.duration]);
 
-  // FILE UPLOAD
+  // FILE SELECTION
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -122,11 +141,12 @@ const [error, setError] = useState("");
 
     if (!file) return;
 
+    setError("");
     setMediaFile(file);
   };
 
   // CONTINUE TO PAYMENT
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const missingFields: string[] = [];
 
     if (!businessName.trim()) {
@@ -153,8 +173,12 @@ const [error, setError] = useState("");
       missingFields.push("Start Date");
     }
 
+    if (!mediaFile) {
+      missingFields.push("Advertisement Media");
+    }
+
     if (missingFields.length > 0) {
-      alert(
+      setError(
         `Please complete the following required field${
           missingFields.length > 1 ? "s" : ""
         }:\n\n${missingFields.join("\n")}`
@@ -163,96 +187,105 @@ const [error, setError] = useState("");
       return;
     }
 
-    const advertisementData = {
-      packageId,
-      businessName: businessName.trim(),
-      socialPlatforms,
-      socialMediaTotal,
-      campaignManagementFee:
-        socialPlatforms.length > 0 ? campaignManagementFee : 0,
-      totalPrice,
-      advertisementTitle: advertisementTitle.trim(),
-      description: description.trim(),
-      whatsapp: whatsapp.trim(),
-      advertisementType,
-      location,
-      startDate,
-      endDate,
-      mediaFileName: mediaFile?.name || null,
-    };
+    setError("");
+    setUploading(true);
 
-    const handleContinue = async () => {
-  if (!mediaFile) {
-    setError("Please upload your advertisement media.");
-    return;
-  }
+    try {
+      // Prepare file for upload
+      const formData = new FormData();
 
-  setError("");
-  setUploading(true);
+      formData.append("file", mediaFile);
 
-  try {
-    const formData = new FormData();
-    formData.append("file", mediaFile);
-
-    const response = await fetch(
-      "/api/advertisements/upload",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Failed to upload advertisement media."
+      // Upload advertisement media
+      const response = await fetch(
+        "/api/advertisements/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
       );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Failed to upload advertisement media."
+        );
+      }
+
+      // Prepare advertisement data
+      const advertisementData = {
+        packageId,
+
+        businessName:
+          businessName.trim(),
+
+        advertisementTitle:
+          advertisementTitle.trim(),
+
+        description:
+          description.trim(),
+
+        whatsapp:
+          whatsapp.trim(),
+
+        advertisementType,
+
+        location,
+
+        startDate,
+
+        endDate,
+
+        mediaFileName:
+          mediaFile.name,
+
+        mediaUrl:
+          data.path,
+
+        mediaType:
+          data.mediaType,
+
+        socialPlatforms,
+
+        socialMediaTotal,
+
+        campaignManagementFee:
+          socialPlatforms.length > 0
+            ? campaignManagementFee
+            : 0,
+
+        billboardPrice:
+          selectedPackage.price,
+
+        totalPrice,
+      };
+
+      // Save advertisement details
+      sessionStorage.setItem(
+        "marondera-billboard-advertisement",
+        JSON.stringify(advertisementData)
+      );
+
+      // Go to payment page
+      router.push(
+        `/advertise/payment?package=${packageId}`
+      );
+    } catch (error) {
+      console.error(
+        "Advertisement upload error:",
+        error
+      );
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload advertisement. Please try again."
+      );
+    } finally {
+      setUploading(false);
     }
-
-    const advertisementData = {
-      packageId,
-      businessName,
-      advertisementTitle,
-      description,
-      whatsapp,
-      advertisementType,
-      location,
-      startDate,
-      endDate,
-      mediaFileName: mediaFile.name,
-      mediaUrl: data.path,
-      mediaType: data.mediaType,
-      socialPlatforms,
-      socialMediaTotal,
-      campaignManagementFee,
-      billboardPrice: selectedPackage.price,
-      totalPrice,
-    };
-
-    sessionStorage.setItem(
-      "marondera-billboard-advertisement",
-      JSON.stringify(advertisementData)
-    );
-
-    router.push(
-      `/advertise/payment?package=${packageId}`
-    );
-  } catch (error) {
-    console.error(
-      "Advertisement upload error:",
-      error
-    );
-
-    setError(
-      error instanceof Error
-        ? error.message
-        : "Failed to upload advertisement. Please try again."
-    );
-  } finally {
-    setUploading(false);
-  }
-};
   };
 
   return (
@@ -260,7 +293,10 @@ const [error, setError] = useState("");
       {/* HEADER */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+          >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
               MB
             </div>
@@ -297,8 +333,9 @@ const [error, setError] = useState("");
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-500">
-            Provide the details of your advertisement and choose where and
-            when you would like it displayed.
+            Provide the details of your advertisement and
+            choose where and when you would like it
+            displayed.
           </p>
         </div>
       </section>
@@ -306,7 +343,6 @@ const [error, setError] = useState("");
       {/* PROGRESS */}
       <section className="px-6 pb-10">
         <div className="mx-auto flex max-w-3xl items-center justify-center">
-          {/* STEP 1 */}
           <div className="flex items-center text-blue-900">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-900 font-black text-white">
               ✓
@@ -319,7 +355,6 @@ const [error, setError] = useState("");
 
           <div className="mx-4 h-px w-12 bg-blue-900 sm:w-24" />
 
-          {/* STEP 2 */}
           <div className="flex items-center text-blue-900">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-900 font-black text-white">
               2
@@ -332,7 +367,6 @@ const [error, setError] = useState("");
 
           <div className="mx-4 h-px w-12 bg-slate-300 sm:w-24" />
 
-          {/* STEP 3 */}
           <div className="flex items-center text-slate-400">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-black">
               3
@@ -364,8 +398,11 @@ const [error, setError] = useState("");
 
                   <div className="mt-1 text-sm font-semibold text-slate-500">
                     {selectedPackage.duration} days ·{" "}
-                    {selectedPackage.advertisements} advertisement
-                    {selectedPackage.advertisements > 1 ? "s" : ""}
+                    {selectedPackage.advertisements}{" "}
+                    advertisement
+                    {selectedPackage.advertisements > 1
+                      ? "s"
+                      : ""}
                   </div>
                 </div>
 
@@ -395,7 +432,9 @@ const [error, setError] = useState("");
                     type="text"
                     value={businessName}
                     onChange={(event) =>
-                      setBusinessName(event.target.value)
+                      setBusinessName(
+                        event.target.value
+                      )
                     }
                     placeholder="e.g. Takudzwa Butchery"
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
@@ -411,7 +450,9 @@ const [error, setError] = useState("");
                     type="tel"
                     value={whatsapp}
                     onChange={(event) =>
-                      setWhatsapp(event.target.value)
+                      setWhatsapp(
+                        event.target.value
+                      )
                     }
                     placeholder="e.g. 077 123 4567"
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
@@ -440,7 +481,9 @@ const [error, setError] = useState("");
                     type="text"
                     value={advertisementTitle}
                     onChange={(event) =>
-                      setAdvertisementTitle(event.target.value)
+                      setAdvertisementTitle(
+                        event.target.value
+                      )
                     }
                     placeholder="e.g. Fresh Beef Available Today!"
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
@@ -455,7 +498,9 @@ const [error, setError] = useState("");
                   <textarea
                     value={description}
                     onChange={(event) =>
-                      setDescription(event.target.value)
+                      setDescription(
+                        event.target.value
+                      )
                     }
                     rows={5}
                     placeholder="Describe your products, services, special offer or promotion..."
@@ -476,14 +521,17 @@ const [error, setError] = useState("");
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Upload the image or video you want customers to see.
+                Upload the image or video you want customers to
+                see.
               </p>
 
               {/* TYPE */}
               <div className="mt-6 grid grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() => setAdvertisementType("image")}
+                  onClick={() =>
+                    setAdvertisementType("image")
+                  }
                   className={`rounded-xl border-2 p-4 text-left transition ${
                     advertisementType === "image"
                       ? "border-blue-900 bg-blue-50"
@@ -503,7 +551,9 @@ const [error, setError] = useState("");
 
                 <button
                   type="button"
-                  onClick={() => setAdvertisementType("video")}
+                  onClick={() =>
+                    setAdvertisementType("video")
+                  }
                   className={`rounded-xl border-2 p-4 text-left transition ${
                     advertisementType === "video"
                       ? "border-blue-900 bg-blue-50"
@@ -562,9 +612,9 @@ const [error, setError] = useState("");
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                MaronderaBillboard is included with every advertising
-                package. You can also choose additional social media
-                platforms.
+                MaronderaBillboard is included with every
+                advertising package. You can also choose
+                additional social media platforms.
               </p>
 
               {/* MARONDERA BILLBOARD */}
@@ -629,22 +679,30 @@ const [error, setError] = useState("");
                         "Promote your advertisement through WhatsApp.",
                     },
                   ].map((platform) => {
-                    const selected = socialPlatforms.includes(
-                      platform.id
-                    );
+                    const selected =
+                      socialPlatforms.includes(
+                        platform.id
+                      );
 
                     return (
                       <button
                         key={platform.id}
                         type="button"
                         onClick={() => {
-                          setSocialPlatforms((current) =>
-                            current.includes(platform.id)
-                              ? current.filter(
-                                  (item) =>
-                                    item !== platform.id
-                                )
-                              : [...current, platform.id]
+                          setSocialPlatforms(
+                            (current) =>
+                              current.includes(
+                                platform.id
+                              )
+                                ? current.filter(
+                                    (item) =>
+                                      item !==
+                                      platform.id
+                                  )
+                                : [
+                                    ...current,
+                                    platform.id,
+                                  ]
                           );
                         }}
                         className={`rounded-2xl border-2 p-5 text-left transition ${
@@ -656,19 +714,23 @@ const [error, setError] = useState("");
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-4">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-2xl">
-                              {platform.id === "facebook" && (
+                              {platform.id ===
+                                "facebook" && (
                                 <FaFacebook className="text-[#1877F2]" />
                               )}
 
-                              {platform.id === "instagram" && (
+                              {platform.id ===
+                                "instagram" && (
                                 <FaInstagram className="text-[#E4405F]" />
                               )}
 
-                              {platform.id === "tiktok" && (
+                              {platform.id ===
+                                "tiktok" && (
                                 <FaTiktok className="text-black" />
                               )}
 
-                              {platform.id === "whatsapp" && (
+                              {platform.id ===
+                                "whatsapp" && (
                                 <FaWhatsapp className="text-[#25D366]" />
                               )}
                             </div>
@@ -712,7 +774,9 @@ const [error, setError] = useState("");
                     ? socialPlatforms
                         .map(
                           (platform) =>
-                            platform.charAt(0).toUpperCase() +
+                            platform
+                              .charAt(0)
+                              .toUpperCase() +
                             platform.slice(1)
                         )
                         .join(", ")
@@ -727,49 +791,55 @@ const [error, setError] = useState("");
                     </div>
 
                     <div className="mt-4 space-y-3 text-sm">
-                      {socialPlatforms.map((platform) => (
-                        <div
-                          key={platform}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="flex items-center gap-2 text-slate-600">
-                            {platform === "facebook" && (
-                              <>
-                                <FaFacebook className="text-[#1877F2]" />
-                                Facebook
-                              </>
-                            )}
+                      {socialPlatforms.map(
+                        (platform) => (
+                          <div
+                            key={platform}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="flex items-center gap-2 text-slate-600">
+                              {platform ===
+                                "facebook" && (
+                                <>
+                                  <FaFacebook className="text-[#1877F2]" />
+                                  Facebook
+                                </>
+                              )}
 
-                            {platform === "instagram" && (
-                              <>
-                                <FaInstagram className="text-[#E4405F]" />
-                                Instagram
-                              </>
-                            )}
+                              {platform ===
+                                "instagram" && (
+                                <>
+                                  <FaInstagram className="text-[#E4405F]" />
+                                  Instagram
+                                </>
+                              )}
 
-                            {platform === "tiktok" && (
-                              <>
-                                <FaTiktok className="text-black" />
-                                TikTok
-                              </>
-                            )}
+                              {platform ===
+                                "tiktok" && (
+                                <>
+                                  <FaTiktok className="text-black" />
+                                  TikTok
+                                </>
+                              )}
 
-                            {platform === "whatsapp" && (
-                              <>
-                                <FaWhatsapp className="text-[#25D366]" />
-                                WhatsApp
-                              </>
-                            )}
-                          </span>
+                              {platform ===
+                                "whatsapp" && (
+                                <>
+                                  <FaWhatsapp className="text-[#25D366]" />
+                                  WhatsApp
+                                </>
+                              )}
+                            </span>
 
-                          <span className="font-bold text-slate-800">
-                            $
-                            {socialPlatformPricing[
-                              platform as keyof typeof socialPlatformPricing
-                            ].toFixed(2)}
-                          </span>
-                        </div>
-                      ))}
+                            <span className="font-bold text-slate-800">
+                              $
+                              {socialPlatformPricing[
+                                platform as keyof typeof socialPlatformPricing
+                              ].toFixed(2)}
+                            </span>
+                          </div>
+                        )
+                      )}
 
                       <div className="flex items-center justify-between border-t border-slate-200 pt-3">
                         <span className="text-slate-600">
@@ -777,7 +847,10 @@ const [error, setError] = useState("");
                         </span>
 
                         <span className="font-bold text-slate-800">
-                          ${campaignManagementFee.toFixed(2)}
+                          $
+                          {campaignManagementFee.toFixed(
+                            2
+                          )}
                         </span>
                       </div>
 
@@ -807,7 +880,8 @@ const [error, setError] = useState("");
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Choose where and when your advertisement should run.
+                Choose where and when your advertisement should
+                run.
               </p>
 
               <div className="mt-6 grid gap-5 md:grid-cols-3">
@@ -819,14 +893,21 @@ const [error, setError] = useState("");
                   <select
                     value={location}
                     onChange={(event) =>
-                      setLocation(event.target.value)
+                      setLocation(
+                        event.target.value
+                      )
                     }
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   >
-                    <option value="">Select location</option>
+                    <option value="">
+                      Select location
+                    </option>
 
                     {locations.map((item) => (
-                      <option key={item} value={item}>
+                      <option
+                        key={item}
+                        value={item}
+                      >
                         {item}
                       </option>
                     ))}
@@ -842,9 +923,15 @@ const [error, setError] = useState("");
                     type="date"
                     value={startDate}
                     onChange={(event) =>
-                      setStartDate(event.target.value)
+                      setStartDate(
+                        event.target.value
+                      )
                     }
-                    min={new Date().toISOString().split("T")[0]}
+                    min={
+                      new Date()
+                        .toISOString()
+                        .split("T")[0]
+                    }
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
@@ -863,7 +950,8 @@ const [error, setError] = useState("");
 
                   {startDate && (
                     <div className="mt-2 text-xs font-semibold text-blue-700">
-                      Automatically calculated from your package.
+                      Automatically calculated from your
+                      package.
                     </div>
                   )}
                 </div>
@@ -872,25 +960,26 @@ const [error, setError] = useState("");
 
             {/* CONTINUE */}
             <div className="mt-10 border-t border-slate-200 pt-8">
-             {error && (
-  <p className="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
-    {error}
-  </p>
-)}
-             <button
-  type="button"
-  onClick={handleContinue}
-  disabled={uploading || !mediaFile}
-  className="w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
->
-  {uploading
-    ? "Uploading Advertisement..."
-    : "Continue to Payment →"}
-</button>
+              {error && (
+                <p className="mb-4 whitespace-pre-line rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleContinue}
+                disabled={uploading || !mediaFile}
+                className="w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {uploading
+                  ? "Uploading Advertisement..."
+                  : "Continue to Payment →"}
+              </button>
 
               <p className="mt-3 text-center text-xs text-slate-400">
-                You will review your advertisement before completing
-                payment.
+                You will review your advertisement before
+                completing payment.
               </p>
             </div>
           </div>
@@ -914,23 +1003,26 @@ const [error, setError] = useState("");
                   {/* MEDIA PREVIEW */}
                   <div className="flex aspect-video items-center justify-center bg-slate-200">
                     {mediaFile &&
-mediaPreviewUrl &&
-advertisementType === "image" ? (
-  <img
-    src={mediaPreviewUrl}
-    alt="Advertisement preview"
-    className="h-full w-full object-cover"
-  />
-) : (
+                    mediaPreviewUrl &&
+                    advertisementType === "image" ? (
+                      <img
+                        src={mediaPreviewUrl}
+                        alt="Advertisement preview"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
                       <div className="text-center">
                         <div className="text-5xl">
-                          {advertisementType === "image"
+                          {advertisementType ===
+                          "image"
                             ? "🖼️"
                             : "🎥"}
                         </div>
 
                         <div className="mt-3 text-sm font-bold text-slate-500">
-                          Your {advertisementType} will appear here
+                          Your{" "}
+                          {advertisementType} will
+                          appear here
                         </div>
                       </div>
                     )}
@@ -939,7 +1031,8 @@ advertisementType === "image" ? (
                   {/* AD CONTENT */}
                   <div className="p-5">
                     <div className="text-xs font-bold uppercase tracking-wide text-blue-600">
-                      {businessName || "Your Business"}
+                      {businessName ||
+                        "Your Business"}
                     </div>
 
                     <div className="mt-2 text-xl font-black text-blue-950">
@@ -1003,45 +1096,61 @@ advertisementType === "image" ? (
                         </div>
 
                         <div className="mt-2 space-y-2">
-                          {socialPlatforms.map((platform) => (
-                            <div
-                              key={platform}
-                              className="flex items-center justify-between"
-                            >
-                              <span className="flex items-center gap-2 text-slate-500">
-                                {platform === "facebook" && (
-                                  <FaFacebook className="text-[#1877F2]" />
-                                )}
+                          {socialPlatforms.map(
+                            (platform) => (
+                              <div
+                                key={platform}
+                                className="flex items-center justify-between"
+                              >
+                                <span className="flex items-center gap-2 text-slate-500">
+                                  {platform ===
+                                    "facebook" && (
+                                    <FaFacebook className="text-[#1877F2]" />
+                                  )}
 
-                                {platform === "instagram" && (
-                                  <FaInstagram className="text-[#E4405F]" />
-                                )}
+                                  {platform ===
+                                    "instagram" && (
+                                    <FaInstagram className="text-[#E4405F]" />
+                                  )}
 
-                                {platform === "tiktok" && (
-                                  <FaTiktok className="text-black" />
-                                )}
+                                  {platform ===
+                                    "tiktok" && (
+                                    <FaTiktok className="text-black" />
+                                  )}
 
-                                {platform === "whatsapp" && (
-                                  <FaWhatsapp className="text-[#25D366]" />
-                                )}
+                                  {platform ===
+                                    "whatsapp" && (
+                                    <FaWhatsapp className="text-[#25D366]" />
+                                  )}
 
-                                {platform.charAt(0).toUpperCase() +
-                                  platform.slice(1)}
-                              </span>
+                                  {platform
+                                    .charAt(0)
+                                    .toUpperCase() +
+                                    platform.slice(
+                                      1
+                                    )}
+                                </span>
 
-                              <span className="font-bold text-slate-700">
-                                $
-                                {socialPlatformPricing[
-                                  platform as keyof typeof socialPlatformPricing
-                                ].toFixed(2)}
-                              </span>
-                            </div>
-                          ))}
+                                <span className="font-bold text-slate-700">
+                                  $
+                                  {socialPlatformPricing[
+                                    platform as keyof typeof socialPlatformPricing
+                                  ].toFixed(2)}
+                                </span>
+                              </div>
+                            )
+                          )}
 
                           <div className="flex justify-between text-slate-500">
-                            <span>Management</span>
                             <span>
-                              ${campaignManagementFee.toFixed(2)}
+                              Management
+                            </span>
+
+                            <span>
+                              $
+                              {campaignManagementFee.toFixed(
+                                2
+                              )}
                             </span>
                           </div>
                         </div>
@@ -1068,8 +1177,8 @@ advertisementType === "image" ? (
 
       {/* FOOTER */}
       <footer className="bg-slate-950 px-6 py-8 text-center text-sm text-slate-400">
-        © {new Date().getFullYear()} MaronderaBillboard. All rights
-        reserved.
+        © {new Date().getFullYear()} MaronderaBillboard. All
+        rights reserved.
       </footer>
     </main>
   );
