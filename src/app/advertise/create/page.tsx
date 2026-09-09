@@ -84,6 +84,7 @@ function CreateAdvertisementContent() {
   const [socialPlatforms, setSocialPlatforms] =
     useState<string[]>([]);
 
+  // MEDIA PREVIEW
   useEffect(() => {
     if (!mediaFile || advertisementType !== "image") {
       setMediaPreviewUrl("");
@@ -147,6 +148,21 @@ function CreateAdvertisementContent() {
 
   // CONTINUE TO PAYMENT
   const handleContinue = async () => {
+    /*
+     * IMPORTANT:
+     * Check mediaFile immediately and create a local
+     * non-null reference. This prevents TypeScript from
+     * treating the file as possibly null later.
+     */
+    if (!mediaFile) {
+      setError(
+        "Please select an advertisement image or video."
+      );
+      return;
+    }
+
+    const selectedMediaFile = mediaFile;
+
     const missingFields: string[] = [];
 
     if (!businessName.trim()) {
@@ -172,24 +188,19 @@ function CreateAdvertisementContent() {
     if (!startDate) {
       missingFields.push("Start Date");
     }
-if (!mediaFile) {
-  missingFields.push("Advertisement Media");
-}
 
-if (missingFields.length > 0) {
-  setError(
-    `Please complete the following required field${
-      missingFields.length > 1 ? "s" : ""
-    }:\n\n${missingFields.join("\n")}`
-  );
+    if (missingFields.length > 0) {
+      setError(
+        `Please complete the following required field${
+          missingFields.length > 1 ? "s" : ""
+        }:\n\n${missingFields.join("\n")}`
+      );
 
-  return;
-}
+      return;
+    }
 
-const selectedMediaFile = mediaFile;
-
-setError("");
-setUploading(true);
+    setError("");
+    setUploading(true);
 
     try {
       // Prepare file for upload
@@ -239,8 +250,8 @@ setUploading(true);
 
         endDate,
 
-       mediaFileName: 
-       selectedMediaFile.name,
+        mediaFileName:
+          selectedMediaFile.name,
 
         mediaUrl:
           data.path,
@@ -834,9 +845,12 @@ setUploading(true);
 
                             <span className="font-bold text-slate-800">
                               $
-                              {socialPlatformPricing[
-                                platform as keyof typeof socialPlatformPricing
-                              ].toFixed(2)}
+                              {
+                                socialPlatformPricing[
+                                  platform as keyof typeof socialPlatformPricing
+                                ]
+                              }
+                              .toFixed(2)
                             </span>
                           </div>
                         )
@@ -1133,11 +1147,11 @@ setUploading(true);
                                 </span>
 
                                 <span className="font-bold text-slate-700">
-                                  $
-                                  {socialPlatformPricing[
-                                    platform as keyof typeof socialPlatformPricing
-                                  ].toFixed(2)}
-                                </span>
+  $
+  {socialPlatformPricing[
+    platform as keyof typeof socialPlatformPricing
+  ].toFixed(2)}
+</span>
                               </div>
                             )
                           )}
@@ -1159,7 +1173,7 @@ setUploading(true);
                     </>
                   )}
 
-                  {/* TOTAL */}
+                  /* TOTAL */
                   <div className="flex justify-between border-t border-slate-200 pt-3">
                     <span className="font-black text-blue-950">
                       Total
@@ -1192,3 +1206,4 @@ export default function CreateAdvertisement() {
     </Suspense>
   );
 }
+
