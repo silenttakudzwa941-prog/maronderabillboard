@@ -1,11 +1,10 @@
 
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-export default function AdvertiserSignupPage() {
+function AdvertiserSignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -228,6 +227,13 @@ export default function AdvertiserSignupPage() {
         </div>
       </div>
     </main>
+  );
+}
+export default function AdvertiserSignupPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdvertiserSignupContent />
+    </Suspense>
   );
 }
 
