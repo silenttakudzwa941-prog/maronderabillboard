@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   FaFacebook,
@@ -54,7 +55,7 @@ type AdvertisementData = {
   totalPrice?: number;
 };
 
-export default function AdvertisementPayment() {
+function AdvertisementPaymentContent() {
   const searchParams = useSearchParams();
 
   const packageId = searchParams.get("package") || "starter";
@@ -84,7 +85,6 @@ export default function AdvertisementPayment() {
       try {
         const parsed = JSON.parse(saved);
 
-        // Backward-compatible defaults for older saved data
         const safeAdvertisement: AdvertisementData = {
           ...parsed,
           socialPlatforms: Array.isArray(parsed.socialPlatforms)
@@ -176,7 +176,7 @@ export default function AdvertisementPayment() {
         {/* HEADER */}
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center px-6 py-4">
-            <a href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
                 MB
               </div>
@@ -190,7 +190,7 @@ export default function AdvertisementPayment() {
                   Your Local Advertising Platform
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
         </header>
 
@@ -323,19 +323,19 @@ export default function AdvertisementPayment() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <a
+              <Link
                 href="/"
                 className="rounded-xl bg-blue-900 px-7 py-4 font-black text-white transition hover:bg-blue-800"
               >
                 Back to Home
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="/advertise"
                 className="rounded-xl bg-slate-200 px-7 py-4 font-black text-blue-900 transition hover:bg-slate-300"
               >
                 Create Another Advertisement
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -354,7 +354,7 @@ export default function AdvertisementPayment() {
       {/* HEADER */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
               MB
             </div>
@@ -368,14 +368,14 @@ export default function AdvertisementPayment() {
                 Your Local Advertising Platform
               </div>
             </div>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href={`/advertise/create?package=${packageId}`}
             className="text-sm font-bold text-slate-600 hover:text-blue-900"
           >
             ← Edit Advertisement
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -824,35 +824,35 @@ export default function AdvertisementPayment() {
                         key={platform}
                         className="flex justify-between"
                       >
-                        <span className="text-sm text-slate-500 flex items-center gap-2">
-  {platform === "facebook" && (
-    <>
-      <FaFacebook className="text-[#1877F2]" />
-      Facebook
-    </>
-  )}
+                        <span className="flex items-center gap-2 text-sm text-slate-500">
+                          {platform === "facebook" && (
+                            <>
+                              <FaFacebook className="text-[#1877F2]" />
+                              Facebook
+                            </>
+                          )}
 
-  {platform === "instagram" && (
-    <>
-      <FaInstagram className="text-[#E4405F]" />
-      Instagram
-    </>
-  )}
+                          {platform === "instagram" && (
+                            <>
+                              <FaInstagram className="text-[#E4405F]" />
+                              Instagram
+                            </>
+                          )}
 
-  {platform === "tiktok" && (
-    <>
-      <FaTiktok className="text-black" />
-      TikTok
-    </>
-  )}
+                          {platform === "tiktok" && (
+                            <>
+                              <FaTiktok className="text-black" />
+                              TikTok
+                            </>
+                          )}
 
-  {platform === "whatsapp" && (
-    <>
-      <FaWhatsapp className="text-[#25D366]" />
-      WhatsApp
-    </>
-  )}
-</span>
+                          {platform === "whatsapp" && (
+                            <>
+                              <FaWhatsapp className="text-[#25D366]" />
+                              WhatsApp
+                            </>
+                          )}
+                        </span>
 
                         <span className="text-sm font-bold text-slate-800">
                           ${price.toFixed(2)}
@@ -917,6 +917,14 @@ export default function AdvertisementPayment() {
         reserved.
       </footer>
     </main>
+  );
+}
+
+export default function AdvertisementPayment() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdvertisementPaymentContent />
+    </Suspense>
   );
 }
 
