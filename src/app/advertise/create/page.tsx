@@ -52,6 +52,8 @@ const campaignManagementFee = 5;
 function CreateAdvertisementContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [uploading, setUploading] = useState(false);
+const [error, setError] = useState("");
 
   const packageId = searchParams.get("package") || "starter";
 
@@ -179,12 +181,78 @@ function CreateAdvertisementContent() {
       mediaFileName: mediaFile?.name || null,
     };
 
+    const handleContinue = async () => {
+  if (!mediaFile) {
+    setError("Please upload your advertisement media.");
+    return;
+  }
+
+  setError("");
+  setUploading(true);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", mediaFile);
+
+    const response = await fetch(
+      "/api/advertisements/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Failed to upload advertisement media."
+      );
+    }
+
+    const advertisementData = {
+      packageId,
+      businessName,
+      advertisementTitle,
+      description,
+      whatsapp,
+      advertisementType,
+      location,
+      startDate,
+      endDate,
+      mediaFileName: mediaFile.name,
+      mediaUrl: data.path,
+      mediaType: data.mediaType,
+      socialPlatforms,
+      socialMediaTotal,
+      campaignManagementFee,
+      billboardPrice: selectedPackage.price,
+      totalPrice,
+    };
+
     sessionStorage.setItem(
       "marondera-billboard-advertisement",
       JSON.stringify(advertisementData)
     );
 
-    router.push(`/advertise/payment?package=${packageId}`);
+    router.push(
+      `/advertise/payment?package=${packageId}`
+    );
+  } catch (error) {
+    console.error(
+      "Advertisement upload error:",
+      error
+    );
+
+    setError(
+      error instanceof Error
+        ? error.message
+        : "Failed to upload advertisement. Please try again."
+    );
+  } finally {
+    setUploading(false);
+  }
+};
   };
 
   return (
@@ -804,13 +872,21 @@ function CreateAdvertisementContent() {
 
             {/* CONTINUE */}
             <div className="mt-10 border-t border-slate-200 pt-8">
-              <button
-                type="button"
-                onClick={handleContinue}
-                className="w-full rounded-xl bg-blue-900 px-6 py-4 text-lg font-black text-white shadow-lg transition hover:bg-blue-800"
-              >
-                Continue to Payment →
-              </button>
+             {error && (
+  <p className="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm font-semibold text-red-700">
+    {error}
+  </p>
+)}
+             <button
+  type="button"
+  onClick={handleContinue}
+  disabled={uploading || !mediaFile}
+  className="w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+>
+  {uploading
+    ? "Uploading Advertisement..."
+    : "Continue to Payment →"}
+</button>
 
               <p className="mt-3 text-center text-xs text-slate-400">
                 You will review your advertisement before completing
