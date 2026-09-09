@@ -837,13 +837,15 @@ function CreateAdvertisementContent() {
                 <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
                   {/* MEDIA PREVIEW */}
                   <div className="flex aspect-video items-center justify-center bg-slate-200">
-                    {mediaFile && advertisementType === "image" ? (
-                      <img
-                        src={mediaPreviewUrl}
-                        alt="Advertisement preview"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
+                    {mediaFile &&
+mediaPreviewUrl &&
+advertisementType === "image" ? (
+  <img
+    src={mediaPreviewUrl}
+    alt="Advertisement preview"
+    className="h-full w-full object-cover"
+  />
+) : (
                       <div className="text-center">
                         <div className="text-5xl">
                           {advertisementType === "image"

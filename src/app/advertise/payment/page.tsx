@@ -152,21 +152,24 @@ const [submitError, setSubmitError] = useState("");
   setSubmitError("");
 
   try {
-    const response = await fetch("/api/advertiser/orders", {
-      method: "POST",
+  const response = await fetch("/api/orders", {
+    method: "POST",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
+    headers: {
+      "Content-Type": "application/json",
+    },
 
-      body: JSON.stringify({
-        packageId,
-        socialPlatforms,
-        paymentMethod,
-        paymentReference: paymentReference.trim(),
-      }),
-    });
+    body: JSON.stringify({
+      packageId,
+      socialPlatforms,
+      paymentMethod,
+      paymentReference: paymentReference.trim(),
+    }),
+  });
 
+ 
+
+  // continue with the rest of your existing code...
     const data = await response.json();
 
     if (!response.ok) {
