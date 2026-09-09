@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const packages = [
   {
@@ -55,11 +56,39 @@ const packages = [
 
 export default function Home() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [checkingAccount, setCheckingAccount] = useState(false);
 
-  const handleContinue = () => {
-    if (!selectedPackage) return;
+  const handleContinue = async () => {
+    if (!selectedPackage || checkingAccount) return;
 
-    window.location.href = `/advertise/create?package=${selectedPackage}`;
+    setCheckingAccount(true);
+
+    try {
+      const supabase = createClient();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        window.location.href = `/advertise/create?package=${selectedPackage}`;
+        return;
+      }
+
+      // Remember the selected package so the account flow can continue
+      sessionStorage.setItem(
+        "marondera-billboard-selected-package",
+        selectedPackage
+      );
+
+      window.location.href = `/advertiser/login?redirect=/advertise/create?package=${selectedPackage}`;
+    } catch (error) {
+      console.error("Account check error:", error);
+
+      window.location.href = `/advertiser/login?redirect=/advertise/create?package=${selectedPackage}`;
+    } finally {
+      setCheckingAccount(false);
+    }
   };
 
   return (
@@ -83,12 +112,28 @@ export default function Home() {
             </div>
           </a>
 
-          <a
-            href="/"
-            className="text-sm font-bold text-slate-600 hover:text-blue-900"
-          >
-            ← Back to Home
-          </a>
+          <div className="flex items-center gap-5">
+            <a
+              href="/advertiser/login"
+              className="text-sm font-bold text-slate-600 hover:text-blue-900"
+            >
+              Advertiser Login
+            </a>
+
+            <a
+              href="/advertiser/signup"
+              className="hidden rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-800 sm:block"
+            >
+              Create Account
+            </a>
+
+            <a
+              href="/"
+              className="text-sm font-bold text-slate-600 hover:text-blue-900"
+            >
+              ← Back to Home
+            </a>
+          </div>
         </div>
       </header>
 
@@ -108,6 +153,29 @@ export default function Home() {
             You can promote your products, services, special offers and
             more on MaronderaBillboard.
           </p>
+
+          {/* ACCOUNT NOTICE */}
+          <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-blue-100 bg-blue-50 p-5">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row sm:text-left">
+              <div>
+                <p className="font-black text-blue-950">
+                  New to MaronderaBillboard?
+                </p>
+
+                <p className="mt-1 text-sm text-blue-800">
+                  You'll need an advertiser account before creating an
+                  advertisement.
+                </p>
+              </div>
+
+              <a
+                href="/advertiser/signup"
+                className="shrink-0 rounded-xl bg-blue-900 px-5 py-3 text-sm font-black text-white transition hover:bg-blue-800"
+              >
+                Create Account
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -168,14 +236,12 @@ export default function Home() {
                     : "border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl"
                 }`}
               >
-                {/* POPULAR LABEL */}
                 {pkg.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-4 py-2 text-xs font-black text-blue-950">
                     MOST POPULAR
                   </div>
                 )}
 
-                {/* PACKAGE HEADER */}
                 <div className="flex items-start justify-between">
                   <div>
                     <h2 className="text-2xl font-black text-blue-950">
@@ -200,7 +266,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* PRICE */}
                 <div className="mt-7 flex items-end gap-2">
                   <span className="text-5xl font-black text-blue-900">
                     ${pkg.price}
@@ -215,12 +280,10 @@ export default function Home() {
                   {pkg.duration}
                 </div>
 
-                {/* DESCRIPTION */}
                 <p className="mt-5 min-h-[72px] text-sm leading-6 text-slate-500">
                   {pkg.description}
                 </p>
 
-                {/* FEATURES */}
                 <div className="mt-6 border-t border-slate-200 pt-6">
                   <div className="space-y-3">
                     {pkg.features.map((feature) => (
@@ -240,7 +303,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* SELECT BUTTON */}
                 <button
                   onClick={(event) => {
                     event.stopPropagation();
@@ -275,13 +337,17 @@ export default function Home() {
                 </div>
 
                 <div className="mt-1 text-lg font-black text-blue-950">
-                  {packages.find(
-                    (pkg) => pkg.id === selectedPackage
-                  )?.name}{" "}
+                  {
+                    packages.find(
+                      (pkg) => pkg.id === selectedPackage
+                    )?.name
+                  }{" "}
                   Package — $
-                  {packages.find(
-                    (pkg) => pkg.id === selectedPackage
-                  )?.price}
+                  {
+                    packages.find(
+                      (pkg) => pkg.id === selectedPackage
+                    )?.price
+                  }
                 </div>
               </>
             ) : (
@@ -299,14 +365,16 @@ export default function Home() {
 
           <button
             onClick={handleContinue}
-            disabled={!selectedPackage}
+            disabled={!selectedPackage || checkingAccount}
             className={`w-full rounded-xl px-8 py-4 font-black transition sm:w-auto ${
-              selectedPackage
+              selectedPackage && !checkingAccount
                 ? "bg-yellow-400 text-blue-950 shadow-lg hover:bg-yellow-300"
                 : "cursor-not-allowed bg-slate-200 text-slate-400"
             }`}
           >
-            Continue →
+            {checkingAccount
+              ? "Checking account..."
+              : "Continue →"}
           </button>
         </div>
       </section>

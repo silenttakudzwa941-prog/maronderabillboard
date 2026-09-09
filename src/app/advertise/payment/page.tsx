@@ -1,8 +1,6 @@
 
 "use client";
 
-"use client";
-
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -77,7 +75,11 @@ function AdvertisementPaymentContent() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const [orderNumber, setOrderNumber] = useState("");
+const [orderNumber, setOrderNumber] = useState("");
+
+const [submitting, setSubmitting] = useState(false);
+
+const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const saved = sessionStorage.getItem(
@@ -140,39 +142,86 @@ function AdvertisementPaymentContent() {
       socialMediaTotal +
       campaignManagementFee;
 
-  const handleSubmit = () => {
-    if (!paymentReference.trim()) {
-      alert("Please enter your payment reference.");
-      return;
+  const handleSubmit = async () => {
+  if (!paymentReference.trim()) {
+    setSubmitError("Please enter your payment reference.");
+    return;
+  }
+
+  setSubmitting(true);
+  setSubmitError("");
+
+  try {
+    const response = await fetch("/api/advertiser/orders", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        packageId,
+        socialPlatforms,
+        paymentMethod,
+        paymentReference: paymentReference.trim(),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = `/advertiser/login?redirect=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`;
+
+        return;
+      }
+
+      throw new Error(
+        data.error || "Failed to submit your order."
+      );
     }
 
-    const newOrderNumber = `MB-${Date.now()}`;
-
-    const order = {
-      ...advertisement,
-      packageId,
-      packageName: selectedPackage.name,
-      amount: totalPrice,
-      socialPlatforms,
-      socialMediaTotal,
-      campaignManagementFee,
-      totalPrice,
-      paymentMethod,
-      paymentReference: paymentReference.trim(),
-      submittedAt: new Date().toISOString(),
-      status: "pending",
-      orderNumber: newOrderNumber,
-    };
-
+    /*
+     * Keep a local copy for the success screen only.
+     * The real order now exists in the database.
+     */
     sessionStorage.setItem(
       "marondera-billboard-order",
-      JSON.stringify(order)
+      JSON.stringify({
+        ...advertisement,
+        packageId,
+        packageName: selectedPackage.name,
+        amount: data.order.totalPrice,
+        socialPlatforms,
+        socialMediaTotal: data.order.socialMediaTotal,
+        campaignManagementFee:
+          data.order.campaignManagementFee,
+        totalPrice: data.order.totalPrice,
+        paymentMethod,
+        paymentReference: data.payment.paymentReference,
+        submittedAt: data.order.createdAt,
+        status: data.order.status,
+        orderNumber: data.order.orderNumber,
+        databaseOrderId: data.order.id,
+      })
     );
 
-    setOrderNumber(newOrderNumber);
+    setOrderNumber(data.order.orderNumber);
     setSubmitted(true);
-  };
+  } catch (error) {
+    console.error("Payment submission error:", error);
 
+    setSubmitError(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong. Please try again."
+    );
+  } finally {
+    setSubmitting(false);
+  }
+};
   if (submitted) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -750,6 +799,11 @@ function AdvertisementPaymentContent() {
                   </>
                 )}
               </div>
+              {submitError && (
+  <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+    {submitError}
+  </div>
+)}
 
               {/* REFERENCE */}
               <div className="mt-6">
@@ -775,12 +829,15 @@ function AdvertisementPaymentContent() {
 
               {/* SUBMIT */}
               <button
-                type="button"
-                onClick={handleSubmit}
-                className="mt-8 w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300"
-              >
-                Confirm Advertisement & Submit →
-              </button>
+  type="button"
+  onClick={handleSubmit}
+  disabled={submitting}
+  className="mt-8 w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+>
+  {submitting
+    ? "Submitting Order..."
+    : "Confirm Advertisement & Submit →"}
+</button>
 
               <p className="mt-3 text-center text-xs leading-5 text-slate-400">
                 Your advertisement will be reviewed after payment
