@@ -172,29 +172,30 @@ function CreateAdvertisementContent() {
     if (!startDate) {
       missingFields.push("Start Date");
     }
+if (!mediaFile) {
+  missingFields.push("Advertisement Media");
+}
 
-    if (!mediaFile) {
-      missingFields.push("Advertisement Media");
-    }
+if (missingFields.length > 0) {
+  setError(
+    `Please complete the following required field${
+      missingFields.length > 1 ? "s" : ""
+    }:\n\n${missingFields.join("\n")}`
+  );
 
-    if (missingFields.length > 0) {
-      setError(
-        `Please complete the following required field${
-          missingFields.length > 1 ? "s" : ""
-        }:\n\n${missingFields.join("\n")}`
-      );
+  return;
+}
 
-      return;
-    }
+const selectedMediaFile = mediaFile;
 
-    setError("");
-    setUploading(true);
+setError("");
+setUploading(true);
 
     try {
       // Prepare file for upload
       const formData = new FormData();
 
-      formData.append("file", mediaFile);
+      formData.append("file", selectedMediaFile);
 
       // Upload advertisement media
       const response = await fetch(
@@ -238,8 +239,8 @@ function CreateAdvertisementContent() {
 
         endDate,
 
-        mediaFileName:
-          mediaFile.name,
+       mediaFileName: 
+       selectedMediaFile.name,
 
         mediaUrl:
           data.path,
