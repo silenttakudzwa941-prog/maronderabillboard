@@ -49,20 +49,35 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+   const {
+  data: { user },
+} = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      return NextResponse.json(
-        {
-          error:
-            "You must be logged in to place an order.",
-        },
-        { status: 401 }
-      );
-    }
+if (!user) {
+  return NextResponse.json(
+    {
+      error: "You must be logged in to create an order.",
+    },
+    { status: 401 }
+  );
+}
+
+const advertiser = await prisma.advertiser.upsert({
+  where: {
+    id: user.id,
+  },
+  update: {},
+  create: {
+    id: user.id,
+    businessName:
+      user.user_metadata?.businessName ||
+      "Advertiser",
+    email: user.email || "",
+    phone:
+      user.user_metadata?.phone ||
+      "",
+  },
+});
 
     // --------------------------------------------------
     // 2. READ REQUEST
@@ -254,7 +269,7 @@ export async function POST(request: Request) {
           data: {
             orderNumber,
 
-            advertiserId: user.id,
+            advertiserId: advertiser.id,
 
             packageId,
             packageName: selectedPackage.name,
@@ -309,7 +324,7 @@ export async function POST(request: Request) {
 
             status: "pending",
 
-            advertiserId: user.id,
+            advertiserId: advertiser.id,
           },
         });
 
@@ -412,18 +427,14 @@ export async function POST(request: Request) {
           }
         : null,
     });
-  } catch (error) {
-    console.error(
-      "Create order error:",
-      error
-    );
+ } catch (error) {
+  console.error("Create order error:", error);
 
-    return NextResponse.json(
-      {
-        error:
-          "Failed to create your order. Please try again.",
-      },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: "Failed to create your order. Please try again.",
+    },
+    { status: 500 }
+  );
+}
 }
