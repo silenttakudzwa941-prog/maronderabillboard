@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-
+import { useSearchParams } from "next/navigation";
 type Order = {
   id: string;
   orderNumber: string;
@@ -33,12 +33,27 @@ type OrderSearchProps = {
 export default function OrderSearch({
   orders,
 }: OrderSearchProps) {
+  const searchParams = useSearchParams();
+
   const [search, setSearch] = useState("");
 
   const [statusFilter, setStatusFilter] = useState<
-    "all" | "pending" | "paid" | "payment_rejected"
-  >("all");
+  "all" | "pending" | "paid" | "payment_rejected" | "unpaid"
+>("all");
+useEffect(() => {
+  const status = searchParams.get("status");
 
+  if (
+    status === "pending" ||
+    status === "paid" ||
+    status === "payment_rejected" ||
+    status === "unpaid"
+  ) {
+    setStatusFilter(status);
+  } else {
+    setStatusFilter("all");
+  }
+}, [searchParams]);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "highestValue" | "lowestValue"
   >("newest");
@@ -59,11 +74,13 @@ export default function OrderSearch({
           .toLowerCase()
           .includes(searchTerm);
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        order.status.toLowerCase() === statusFilter;
+   const matchesStatus =
+  statusFilter === "all" ||
+  (statusFilter === "unpaid"
+    ? !order.payment
+    : order.status.toLowerCase() === statusFilter);
 
-      return matchesSearch && matchesStatus;
+return matchesSearch && matchesStatus;
     });
 
     return [...filtered].sort((a, b) => {
@@ -109,6 +126,9 @@ export default function OrderSearch({
     (order) =>
       order.status.toLowerCase() === "payment_rejected"
   ).length;
+  const unpaidCount = orders.filter(
+  (order) => !order.payment
+).length;
 
   function clearFilters() {
     setSearch("");
@@ -264,7 +284,20 @@ export default function OrderSearch({
           >
             Payment Rejected ({rejectedCount})
           </button>
-
+{/* Unpaid */}
+<button
+  type="button"
+  onClick={() =>
+    setStatusFilter("unpaid")
+  }
+  className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+    statusFilter === "unpaid"
+      ? "bg-blue-600 text-white"
+      : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+  }`}
+>
+  Unpaid ({unpaidCount})
+</button>
         </div>
 
         {/* Clear */}

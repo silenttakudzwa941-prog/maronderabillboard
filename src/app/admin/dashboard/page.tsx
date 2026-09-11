@@ -314,7 +314,7 @@ export default async function AdminDashboard() {
 
     {/* Orders */}
     <Link
-      href="/admin/orders"
+      href="/admin/orders?status=unpaid"
       className="group rounded-2xl border border-blue-200 bg-blue-50 p-6 transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-4">
