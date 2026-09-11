@@ -129,7 +129,7 @@ export default function AdvertiserDashboard() {
     try {
       await supabase.auth.signOut();
 
-      router.replace("/advertiser/login");
+      router.replace("/login");
       router.refresh();
     } catch (error) {
       console.error("Logout error:", error);
@@ -204,7 +204,7 @@ export default function AdvertiserDashboard() {
           </p>
 
           <Link
-            href="/advertiser/login"
+            href="/login"
             className="mt-6 inline-block rounded-xl bg-blue-950 px-5 py-3 text-sm font-bold text-white"
           >
             Return to login
@@ -224,11 +224,11 @@ export default function AdvertiserDashboard() {
               href="/"
               className="text-2xl font-black tracking-tight text-blue-950"
             >
-              MaronderaBillboard
+              ZimDigitalBillboard
             </Link>
 
             <p className="mt-1 text-sm text-slate-500">
-              Advertiser Dashboard
+             Advertising Portal 
             </p>
           </div>
 
@@ -255,7 +255,7 @@ export default function AdvertiserDashboard() {
           </h1>
 
           <p className="mt-2 text-slate-600">
-            Manage your billboard advertisements, orders and campaigns.
+          Manage your advertising campaigns, orders and payments from one place.
           </p>
         </section>
 
