@@ -20,18 +20,80 @@ export default async function AdminAdvertisersPage() {
       phone: true,
       createdAt: true,
 
-      _count: {
-        select: {
-          ads: true,
-          orders: true,
-        },
+     _count: {
+  select: {
+    ads: true,
+    orders: true,
+  },
+},
+
+ads: {
+  select: {
+    status: true,
+  },
+},
+
+orders: {
+  select: {
+    totalPrice: true,
+    payment: {
+      select: {
+        status: true,
+        amount: true,
       },
+    },
+  },
+},
     },
 
     orderBy: {
       createdAt: "desc",
     },
   });
+
+  const searchAdvertisers = advertisers.map((advertiser) => ({
+    id: advertiser.id,
+    businessName: advertiser.businessName,
+    email: advertiser.email,
+    phone: advertiser.phone,
+    createdAt: advertiser.createdAt.toISOString(),
+
+    _count: advertiser._count,
+
+    activeAds: advertiser.ads.filter(
+      (ad) => ad.status.toLowerCase() === "active"
+    ).length,
+
+    pendingAds: advertiser.ads.filter(
+      (ad) => ad.status.toLowerCase() === "pending"
+    ).length,
+
+    rejectedAds: advertiser.ads.filter(
+      (ad) => ad.status.toLowerCase() === "rejected"
+    ).length,
+
+    totalOrderValue: advertiser.orders.reduce(
+      (total, order) =>
+        total + Number(order.totalPrice),
+      0
+    ),
+
+    verifiedPayments: advertiser.orders.reduce(
+      (total, order) =>
+        order.payment?.status.toLowerCase() === "verified"
+          ? total + Number(order.payment.amount)
+          : total,
+      0
+    ),
+
+    pendingPayments: advertiser.orders.reduce(
+      (total, order) =>
+        order.payment?.status.toLowerCase() === "pending"
+          ? total + Number(order.payment.amount)
+          : total,
+      0
+    ),
+  }));
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10">
@@ -103,7 +165,7 @@ export default async function AdminAdvertisersPage() {
         {/* Advertisers table */}
       {/* Advertisers table + search */}
 <div className="mt-8">
-  <AdvertiserSearch advertisers={advertisers} />
+ <AdvertiserSearch advertisers={searchAdvertisers} /> 
 </div>
       </div>
     </main>

@@ -1,7 +1,7 @@
-"use client";
 
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -37,7 +37,36 @@ const navigation = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-const router = useRouter();
+  const router = useRouter();
+
+  const [attention, setAttention] = useState({
+    pendingAds: 0,
+    pendingPayments: 0,
+    pendingOrders: 0,
+  });
+    useEffect(() => {
+    async function loadAttention() {
+      try {
+        const response = await fetch("/api/admin/attention");
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        setAttention({
+          pendingAds: data.pendingAds ?? 0,
+          pendingPayments: data.pendingPayments ?? 0,
+          pendingOrders: data.pendingOrders ?? 0,
+        });
+      } catch {
+        // Keep sidebar usable if the attention request fails.
+      }
+    }
+
+    loadAttention();
+  }, []);
 
 async function handleLogout() {
   const supabase = createClient();

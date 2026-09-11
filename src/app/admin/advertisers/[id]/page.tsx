@@ -62,13 +62,63 @@ export default async function AdvertiserDetailsPage({
     (ad) => ad.status.toLowerCase() === "rejected"
   ).length;
 
-  const totalOrders = advertiser.orders.length;
+const totalOrders = advertiser.orders.length;
 
-  const totalSpent = advertiser.orders.reduce(
-    (total, order) => total + Number(order.totalPrice),
+const totalSpent = advertiser.orders.reduce(
+  (total, order) => total + Number(order.totalPrice),
+  0
+);
+
+const verifiedPayments = advertiser.orders
+  .filter(
+    (order) =>
+      order.payment?.status.toLowerCase() === "verified"
+  )
+  .reduce(
+    (total, order) =>
+      total + Number(order.payment?.amount || 0),
     0
   );
 
+const pendingPayments = advertiser.orders
+  .filter(
+    (order) =>
+      order.payment?.status.toLowerCase() === "pending"
+  )
+  .reduce(
+    (total, order) =>
+      total + Number(order.payment?.amount || 0),
+    0
+  );
+
+const rejectedPayments = advertiser.orders
+  .filter(
+    (order) =>
+      order.payment?.status.toLowerCase() === "rejected"
+  )
+  .reduce(
+    (total, order) =>
+      total + Number(order.payment?.amount || 0),
+    0
+  );
+  const verifiedPaymentCount = advertiser.orders.filter(
+  (order) =>
+    order.payment?.status.toLowerCase() === "verified"
+).length;
+
+const pendingPaymentCount = advertiser.orders.filter(
+  (order) =>
+    order.payment?.status.toLowerCase() === "pending"
+).length;
+
+const rejectedPaymentCount = advertiser.orders.filter(
+  (order) =>
+    order.payment?.status.toLowerCase() === "rejected"
+).length;
+
+const unpaidOrderCount = advertiser.orders.filter(
+  (order) => !order.payment
+).length;
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10">
       <div className="mx-auto max-w-7xl">
@@ -158,7 +208,41 @@ export default async function AdvertiserDetailsPage({
 
           </div>
         </div>
+        {/* Quick Actions */}
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">
+              Quick Actions
+            </h2>
 
+            <p className="mt-1 text-sm text-slate-500">
+              Manage this advertiser's advertisements and orders.
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/admin/advertisements"
+              className="inline-flex items-center justify-center rounded-xl bg-blue-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-900"
+            >
+              📢 Manage Advertisements
+            </Link>
+
+            <Link
+              href="/admin/orders"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+            >
+              🧾 Manage Orders
+            </Link>
+
+            <Link
+              href="/admin/payments"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+            >
+              💳 Manage Payments
+            </Link>
+          </div>
+        </div>
         {/* Statistics */}
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
 
@@ -222,6 +306,96 @@ export default async function AdvertiserDetailsPage({
             </p>
           </div>
 
+        </div>
+
+        {/* Financial Overview */}
+        <div className="mt-8">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">
+              Financial Overview
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Payment activity for this advertiser.
+            </p>
+          </div>
+
+        <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+
+            {/* Total Order Value */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Total Order Value
+              </p>
+
+              <p className="mt-2 text-2xl font-black text-blue-950">
+                ${totalSpent.toFixed(2)}
+              </p>
+            </div>
+
+          {/* Verified Payments */}
+<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <p className="text-sm text-slate-500">
+    Verified Payments
+  </p>
+
+  <p className="mt-2 text-2xl font-black text-green-600">
+    ${verifiedPayments.toFixed(2)}
+  </p>
+
+  <p className="mt-2 text-xs font-semibold text-slate-400">
+    {verifiedPaymentCount}{" "}
+    {verifiedPaymentCount === 1 ? "payment" : "payments"}
+  </p>
+</div>
+
+           {/* Pending Payments */}
+<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <p className="text-sm text-slate-500">
+    Pending Payments
+  </p>
+
+  <p className="mt-2 text-2xl font-black text-amber-500">
+    ${pendingPayments.toFixed(2)}
+  </p>
+
+  <p className="mt-2 text-xs font-semibold text-slate-400">
+    {pendingPaymentCount}{" "}
+    {pendingPaymentCount === 1 ? "payment" : "payments"}
+  </p>
+</div>
+          {/* Rejected Payments */}
+<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <p className="text-sm text-slate-500">
+    Rejected Payments
+  </p>
+
+  <p className="mt-2 text-2xl font-black text-red-600">
+    ${rejectedPayments.toFixed(2)}
+  </p>
+
+  <p className="mt-2 text-xs font-semibold text-slate-400">
+    {rejectedPaymentCount}{" "}
+    {rejectedPaymentCount === 1 ? "payment" : "payments"}
+  </p>
+</div>
+            {/* Unpaid Orders */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Unpaid Orders
+              </p>
+
+              <p className="mt-2 text-2xl font-black text-orange-600">
+                {unpaidOrderCount}
+              </p>
+
+              <p className="mt-2 text-xs font-semibold text-slate-400">
+                {unpaidOrderCount === 1
+                  ? "order awaiting payment"
+                  : "orders awaiting payment"}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Advertisements */}
