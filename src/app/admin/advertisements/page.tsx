@@ -8,9 +8,9 @@ import AdvertisementSearch from "./AdvertisementSearch";
 export default async function AdminAdvertisementsPage() {
   const admin = await getAdmin();
 
-  if (!admin) {
-    redirect("/advertiser/login?error=admin_required");
-  }
+if (!admin) {
+  redirect("/admin/login");
+}
 
   const advertisements = await prisma.ad.findMany({
     include: {

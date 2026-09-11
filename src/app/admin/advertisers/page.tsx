@@ -9,7 +9,7 @@ export default async function AdminAdvertisersPage() {
   const admin = await getAdmin();
 
   if (!admin) {
-    redirect("/advertiser/login?error=admin_required");
+   redirect("/admin/login");
   }
 
   const advertisers = await prisma.advertiser.findMany({

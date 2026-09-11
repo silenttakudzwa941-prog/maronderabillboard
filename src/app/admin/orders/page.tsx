@@ -9,7 +9,7 @@ export default async function AdminOrdersPage() {
   const admin = await getAdmin();
 
   if (!admin) {
-    redirect("/advertiser/login?error=admin_required");
+   redirect("/admin/login");
   }
 
   const orders = await prisma.order.findMany({

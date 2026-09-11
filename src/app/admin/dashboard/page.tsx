@@ -8,7 +8,7 @@ export default async function AdminDashboard() {
   const admin = await getAdmin();
 
   if (!admin) {
-    redirect("/advertiser/login?error=admin_required");
+    redirect("/admin/login");
   }
 
   const [

@@ -16,7 +16,7 @@ export default async function AdvertiserDetailsPage({
   const admin = await getAdmin();
 
   if (!admin) {
-    redirect("/advertiser/login?error=admin_required");
+    redirect("/admin/login");
   }
 
   const { id } = await params;
