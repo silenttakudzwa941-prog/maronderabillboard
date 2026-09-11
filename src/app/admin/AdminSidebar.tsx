@@ -1,7 +1,11 @@
 "use client";
 
+"use client";
+
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/client";
 
 const navigation = [
   {
@@ -33,6 +37,16 @@ const navigation = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+const router = useRouter();
+
+async function handleLogout() {
+  const supabase = createClient();
+
+  await supabase.auth.signOut();
+
+  router.replace("/admin/login");
+  router.refresh();
+}
 
   return (
     <aside className="w-full border-b border-slate-200 bg-blue-950 text-white lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
@@ -89,14 +103,24 @@ export default function AdminSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-blue-900 px-6 py-5">
-          <Link
-            href="/"
-            className="text-sm font-semibold text-blue-200 transition hover:text-white"
-          >
-            ← Back to website
-          </Link>
-        </div>
+        <div className="border-t border-blue-900 px-6 py-5 space-y-3">
+
+  <button
+    type="button"
+    onClick={handleLogout}
+    className="w-full rounded-xl bg-red-600 px-4 py-3 text-left text-sm font-bold text-white transition hover:bg-red-700"
+  >
+    🚪 Sign out
+  </button>
+
+  <Link
+    href="/"
+    className="block text-sm font-semibold text-blue-200 transition hover:text-white"
+  >
+    ← Back to website
+  </Link>
+
+</div>
       </div>
     </aside>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { getAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+import AdvertisementSearch from "./AdvertisementSearch";
 
 export default async function AdminAdvertisementsPage() {
   const admin = await getAdmin();
@@ -117,146 +118,7 @@ export default async function AdminAdvertisementsPage() {
         </div>
 
         {/* Advertisements table */}
-        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-200 px-6 py-5">
-            <h2 className="text-lg font-bold text-slate-900">
-              All Advertisements
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Review advertisements submitted to the platform.
-            </p>
-          </div>
-
-          {advertisements.length === 0 ? (
-            <div className="px-6 py-16 text-center">
-              <p className="font-semibold text-slate-700">
-                No advertisements found
-              </p>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Advertisements submitted by advertisers will appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px] text-left">
-
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Advertisement
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Advertiser
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Category
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Status
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Views
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Created
-                    </th>
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-  Action
-</th>
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-slate-100">
-
-                  {advertisements.map((ad) => (
-                    <tr
-                      key={ad.id}
-                      className="transition hover:bg-slate-50"
-                    >
-
-                      {/* Advertisement */}
-                      <td className="px-6 py-5">
-                        <p className="font-bold text-slate-900">
-                          {ad.title}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-400">
-                          {ad.mediaType}
-                        </p>
-                      </td>
-
-                      {/* Advertiser */}
-                      <td className="px-6 py-5">
-                        <p className="font-semibold text-slate-700">
-                          {ad.advertiser.businessName}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-400">
-                          {ad.advertiser.email}
-                        </p>
-                      </td>
-
-                      {/* Category */}
-                      <td className="px-6 py-5 text-sm text-slate-600">
-                        {ad.category}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                            ad.status.toLowerCase() === "active"
-                              ? "bg-green-100 text-green-700"
-                              : ad.status.toLowerCase() === "rejected"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-amber-100 text-amber-700"
-                          }`}
-                        >
-                          {ad.status}
-                        </span>
-                      </td>
-
-                      {/* Views */}
-                      <td className="px-6 py-5 text-sm font-semibold text-slate-700">
-                        {ad.views}
-                      </td>
-
-                      {/* Date */}
-                      <td className="px-6 py-5 text-sm text-slate-500">
-                        {new Date(
-                          ad.createdAt
-                        ).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-                      {/* Review */}
-<td className="px-6 py-5">
-  <Link
-    href={`/admin/advertisements/${ad.id}`}
-    className="inline-flex rounded-lg bg-blue-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-900"
-  >
-    Review
-  </Link>
-</td>
-
-                    </tr>
-                  ))}
-
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <AdvertisementSearch advertisements={advertisements} />
 
       </div>
     </main>

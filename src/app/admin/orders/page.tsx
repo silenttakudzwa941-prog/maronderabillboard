@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { getAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+import OrderSearch from "./OrderSearch";
 
 export default async function AdminOrdersPage() {
   const admin = await getAdmin();
@@ -35,6 +36,32 @@ export default async function AdminOrdersPage() {
       createdAt: "desc",
     },
   });
+  const searchOrders = orders.map((order) => ({
+  id: order.id,
+  orderNumber: order.orderNumber,
+  packageName: order.packageName,
+
+  totalPrice: Number(order.totalPrice),
+
+  status: order.status,
+  createdAt: order.createdAt.toISOString(),
+
+  advertiser: {
+    id: order.advertiser.id,
+    businessName: order.advertiser.businessName,
+    email: order.advertiser.email,
+  },
+
+  payment: order.payment
+    ? {
+        id: order.payment.id,
+        paymentMethod: order.payment.paymentMethod,
+        paymentReference: order.payment.paymentReference,
+        amount: Number(order.payment.amount),
+        status: order.payment.status,
+      }
+    : null,
+}));
 
   const totalOrders = orders.length;
 
@@ -184,236 +211,7 @@ export default async function AdminOrdersPage() {
         </div>
 
         {/* Orders table */}
-        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-          <div className="border-b border-slate-200 px-6 py-5">
-            <h2 className="text-lg font-bold text-slate-900">
-              All Orders
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              View complete order and payment details.
-            </p>
-          </div>
-
-          {orders.length === 0 ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-slate-500">
-                No orders have been created yet.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-
-              <table className="w-full min-w-[1100px] text-left">
-
-                <thead className="border-b border-slate-200 bg-slate-50">
-
-                  <tr>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Order
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Advertiser
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Package
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Total
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Order Status
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Payment
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Date
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Action
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody className="divide-y divide-slate-100">
-
-                  {orders.map((order) => {
-                    const orderStatus =
-                      order.status.toLowerCase();
-
-                    const paymentStatus =
-                      order.payment?.status?.toLowerCase() ||
-                      "unpaid";
-
-                    return (
-                      <tr
-                        key={order.id}
-                        className="transition hover:bg-slate-50"
-                      >
-
-                        {/* Order */}
-                        <td className="px-6 py-5">
-
-                          <p className="font-bold text-slate-900">
-                            {order.orderNumber}
-                          </p>
-
-                          <p className="mt-1 max-w-[180px] truncate font-mono text-xs text-slate-400">
-                            {order.id}
-                          </p>
-
-                        </td>
-
-                        {/* Advertiser */}
-                        <td className="px-6 py-5">
-
-                          <p className="font-semibold text-slate-900">
-                            {order.advertiser.businessName}
-                          </p>
-
-                          <p className="mt-1 text-sm text-slate-500">
-                            {order.advertiser.email}
-                          </p>
-
-                        </td>
-
-                        {/* Package */}
-                        <td className="px-6 py-5">
-
-                          <p className="font-semibold text-slate-900">
-                            {order.packageName}
-                          </p>
-
-                          <p className="mt-1 font-mono text-xs text-slate-400">
-                            {order.packageId}
-                          </p>
-
-                        </td>
-
-                        {/* Total */}
-                        <td className="px-6 py-5">
-
-                          <p className="font-black text-blue-950">
-                            $
-                            {Number(
-                              order.totalPrice
-                            ).toFixed(2)}
-                          </p>
-
-                        </td>
-
-                        {/* Order Status */}
-                        <td className="px-6 py-5">
-
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                              orderStatus === "paid" ||
-                              orderStatus === "confirmed" ||
-                              orderStatus === "completed"
-                                ? "bg-green-100 text-green-700"
-                                : orderStatus === "rejected" ||
-                                  orderStatus === "cancelled"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {order.status}
-                          </span>
-
-                        </td>
-
-                        {/* Payment */}
-                        <td className="px-6 py-5">
-
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                              paymentStatus === "paid" ||
-                              paymentStatus === "verified"
-                                ? "bg-green-100 text-green-700"
-                                : paymentStatus === "rejected"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {order.payment?.status ||
-                              "Unpaid"}
-                          </span>
-
-                          {order.payment && (
-                            <p className="mt-1 text-xs text-slate-400">
-                              {order.payment.paymentMethod}
-                            </p>
-                          )}
-
-                        </td>
-
-                        {/* Date */}
-                        <td className="px-6 py-5">
-
-                          <p className="text-sm text-slate-700">
-                            {new Date(
-                              order.createdAt
-                            ).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )}
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-400">
-                            {new Date(
-                              order.createdAt
-                            ).toLocaleTimeString(
-                              "en-GB",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
-                          </p>
-
-                        </td>
-
-                        {/* Action */}
-                        <td className="px-6 py-5">
-
-                          <Link
-                            href={`/admin/orders/${order.id}`}
-                            className="inline-flex rounded-lg bg-blue-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-900"
-                          >
-                            View Order
-                          </Link>
-
-                        </td>
-
-                      </tr>
-                    );
-                  })}
-
-                </tbody>
-
-              </table>
-
-            </div>
-          )}
-
-        </div>
-
+       <OrderSearch orders={searchOrders} />
       </div>
     </main>
   );

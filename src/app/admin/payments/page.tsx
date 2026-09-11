@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { getAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
+import PaymentSearch from "./PaymentSearch";
 
 export default async function PaymentsPage() {
   const admin = await getAdmin();
@@ -28,6 +29,27 @@ export default async function PaymentsPage() {
       createdAt: "desc",
     },
   });
+  const searchPayments = payments.map((payment) => ({
+  id: payment.id,
+  paymentMethod: payment.paymentMethod,
+  paymentReference: payment.paymentReference,
+  amount: Number(payment.amount),
+  status: payment.status,
+  createdAt: payment.createdAt.toISOString(),
+
+  order: {
+    id: payment.order.id,
+    orderNumber: payment.order.orderNumber,
+
+    advertiser: {
+      id: payment.order.advertiser.id,
+      businessName:
+        payment.order.advertiser.businessName,
+      email:
+        payment.order.advertiser.email,
+    },
+  },
+}));
 
   const totalPayments = payments.length;
 
@@ -160,153 +182,7 @@ export default async function PaymentsPage() {
         </div>
 
         {/* Payment table */}
-        <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="border-b border-slate-200 px-6 py-5">
-            <h2 className="text-lg font-black text-slate-900">
-              Payment Records
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              {totalPayments} payment
-              {totalPayments === 1 ? "" : "s"} recorded.
-            </p>
-          </div>
-
-          {payments.length === 0 ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-sm font-semibold text-slate-500">
-                No payments have been submitted yet.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-[1100px] w-full text-left">
-                <thead className="bg-slate-50">
-                  <tr className="border-b border-slate-200">
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Payment
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Advertiser
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Order
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Amount
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Method
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Status
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Submitted
-                    </th>
-
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-wide text-slate-500">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {payments.map((payment) => (
-                    <tr
-                      key={payment.id}
-                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                    >
-                      <td className="px-6 py-5">
-                        <p className="max-w-[180px] truncate text-sm font-bold text-slate-900">
-                          {payment.paymentReference}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-400">
-                          {payment.id}
-                        </p>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <p className="text-sm font-bold text-slate-900">
-                          {payment.order.advertiser.businessName}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {payment.order.advertiser.email}
-                        </p>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <p className="text-sm font-bold text-blue-950">
-                          {payment.order.orderNumber}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {payment.order.packageName}
-                        </p>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <p className="text-sm font-black text-slate-900">
-                          ${Number(
-                            payment.amount
-                          ).toFixed(2)}
-                        </p>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <span className="text-sm font-semibold capitalize text-slate-700">
-                          {payment.paymentMethod}
-                        </span>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-black capitalize ${statusClasses(
-                            payment.status
-                          )}`}
-                        >
-                          {payment.status}
-                        </span>
-
-                        {payment.verifiedAt && (
-                          <p className="mt-2 text-xs text-slate-400">
-                            Verified{" "}
-                            {formatDate(
-                              payment.verifiedAt
-                            )}
-                          </p>
-                        )}
-                      </td>
-
-                      <td className="px-6 py-5 text-sm text-slate-600">
-                        {formatDate(
-                          payment.createdAt
-                        )}
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <Link
-                          href={`/admin/orders/${payment.order.id}`}
-                          className="inline-flex rounded-lg bg-blue-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-900"
-                        >
-                          View Order
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <PaymentSearch payments={searchPayments} />
 
         {/* Additional summary */}
         <div className="mt-6 rounded-2xl bg-blue-950 p-6 text-white">
