@@ -15,21 +15,23 @@ export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
     include: {
       advertiser: {
-        select: {
-          businessName: true,
-          email: true,
-        },
-      },
+  select: {
+    id: true,
+    businessName: true,
+    email: true,
+  },
+},
 
-      payment: {
-        select: {
-          status: true,
-          paymentMethod: true,
-          amount: true,
-          paymentReference: true,
-          verifiedAt: true,
-        },
-      },
+   payment: {
+  select: {
+    id: true,
+    status: true,
+    paymentMethod: true,
+    paymentReference: true,
+    amount: true,
+    verifiedAt: true,
+  },
+},
     },
 
     orderBy: {
