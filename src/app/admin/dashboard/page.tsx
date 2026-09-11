@@ -321,6 +321,108 @@ export default async function AdminDashboard() {
           </Link>
 
         </div>
+        {/* Quick Actions */}
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">
+              Quick Actions
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Jump directly to the areas that need your attention.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            <Link
+              href="/admin/advertisements"
+              className="group rounded-2xl border border-yellow-200 bg-yellow-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">📢</span>
+
+                {pendingAdvertisementCount > 0 && (
+                  <span className="rounded-full bg-yellow-200 px-2.5 py-1 text-xs font-black text-yellow-900">
+                    {pendingAdvertisementCount}
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-4 text-sm font-black text-slate-900">
+                Review Advertisements
+              </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Approve or reject submitted ads.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/orders"
+              className="group rounded-2xl border border-blue-200 bg-blue-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">🧾</span>
+
+                {pendingOrderCount > 0 && (
+                  <span className="rounded-full bg-blue-200 px-2.5 py-1 text-xs font-black text-blue-950">
+                    {pendingOrderCount}
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-4 text-sm font-black text-slate-900">
+                Manage Orders
+              </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Review orders and campaign details.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/payments"
+              className="group rounded-2xl border border-green-200 bg-green-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">💳</span>
+
+                {pendingPaymentCount > 0 && (
+                  <span className="rounded-full bg-green-200 px-2.5 py-1 text-xs font-black text-green-900">
+                    {pendingPaymentCount}
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-4 text-sm font-black text-slate-900">
+                Verify Payments
+              </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Verify or reject advertiser payments.
+              </p>
+            </Link>
+
+            <Link
+              href="/admin/advertisers"
+              className="group rounded-2xl border border-purple-200 bg-purple-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">👥</span>
+              </div>
+
+              <p className="mt-4 text-sm font-black text-slate-900">
+                Manage Advertisers
+              </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                View advertiser accounts and activity.
+              </p>
+            </Link>
+
+          </div>
+        </div>
 
         {/* Recent Activity */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -356,45 +458,58 @@ export default async function AdminDashboard() {
               ) : (
                 recentOrders.map((order) => (
                   <Link
-                    key={order.id}
-                    href={`/admin/orders/${order.id}`}
-                    className="block px-6 py-5 transition hover:bg-slate-50"
-                  >
-                    <div className="flex items-start justify-between gap-4">
+  key={order.id}
+  href={`/admin/orders/${order.id}`}
+  className="block px-6 py-5 transition hover:bg-slate-50"
+>
+  <div className="flex items-start justify-between gap-4">
+    <div className="min-w-0 flex-1">
+      <div className="flex items-center gap-2">
+        <p className="truncate text-sm font-black text-blue-950">
+          {order.orderNumber}
+        </p>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-black text-blue-950">
-                          {order.orderNumber}
-                        </p>
+        <span className="shrink-0 text-xs font-bold text-blue-600">
+          View →
+        </span>
+      </div>
 
-                        <p className="mt-1 truncate text-sm font-semibold text-slate-700">
-                          {order.advertiser.businessName}
-                        </p>
+      <p className="mt-1 truncate text-sm font-semibold text-slate-700">
+        {order.advertiser.businessName}
+      </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
-                          {order.packageName} •{" "}
-                          {formatDate(order.createdAt)}
-                        </p>
-                      </div>
+      <p className="mt-1 text-xs text-slate-400">
+        {order.packageName} • {formatDate(order.createdAt)}
+      </p>
 
-                      <div className="shrink-0 text-right">
-                        <p className="text-sm font-black text-slate-900">
-                          ${Number(
-                            order.totalPrice
-                          ).toFixed(2)}
-                        </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span
+          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClasses(
+            order.status
+          )}`}
+        >
+          Order: {order.status}
+        </span>
 
-                        <span
-                          className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClasses(
-                            order.status
-                          )}`}
-                        >
-                          {order.status}
-                        </span>
-                      </div>
+        {order.payment && (
+          <span
+            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClasses(
+              order.payment.status
+            )}`}
+          >
+            Payment: {order.payment.status}
+          </span>
+        )}
+      </div>
+    </div>
 
-                    </div>
-                  </Link>
+    <div className="shrink-0 text-right">
+      <p className="text-sm font-black text-slate-900">
+        ${Number(order.totalPrice).toFixed(2)}
+      </p>
+    </div>
+  </div>
+</Link>
                 ))
               )}
 
@@ -431,46 +546,54 @@ export default async function AdminDashboard() {
                 </div>
               ) : (
                 recentPayments.map((payment) => (
-                  <Link
-                    key={payment.id}
-                    href={`/admin/orders/${payment.order.id}`}
-                    className="block px-6 py-5 transition hover:bg-slate-50"
-                  >
-                    <div className="flex items-start justify-between gap-4">
+                 <Link
+  key={payment.id}
+  href={`/admin/orders/${payment.order.id}`}
+  className="block px-6 py-5 transition hover:bg-slate-50"
+>
+  <div className="flex items-start justify-between gap-4">
+    <div className="min-w-0 flex-1">
+      <div className="flex items-center gap-2">
+        <p className="truncate text-sm font-black text-blue-950">
+          {payment.order.orderNumber}
+        </p>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-black text-blue-950">
-                          {payment.order.orderNumber}
-                        </p>
+        <span className="shrink-0 text-xs font-bold text-blue-600">
+          View →
+        </span>
+      </div>
 
-                        <p className="mt-1 truncate text-sm font-semibold text-slate-700">
-                          {payment.order.advertiser.businessName}
-                        </p>
+      <p className="mt-1 truncate text-sm font-semibold text-slate-700">
+        {payment.order.advertiser.businessName}
+      </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
-                          {payment.paymentMethod} •{" "}
-                          {formatDate(payment.createdAt)}
-                        </p>
-                      </div>
+      <p className="mt-1 text-xs text-slate-400">
+        {payment.paymentMethod} •{" "}
+        {formatDate(payment.createdAt)}
+      </p>
 
-                      <div className="shrink-0 text-right">
-                        <p className="text-sm font-black text-slate-900">
-                          ${Number(
-                            payment.amount
-                          ).toFixed(2)}
-                        </p>
+      <p className="mt-1 truncate text-xs text-slate-400">
+        Ref: {payment.paymentReference}
+      </p>
 
-                        <span
-                          className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClasses(
-                            payment.status
-                          )}`}
-                        >
-                          {payment.status}
-                        </span>
-                      </div>
+      <div className="mt-3">
+        <span
+          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClasses(
+            payment.status
+          )}`}
+        >
+          Payment: {payment.status}
+        </span>
+      </div>
+    </div>
 
-                    </div>
-                  </Link>
+    <div className="shrink-0 text-right">
+      <p className="text-sm font-black text-slate-900">
+        ${Number(payment.amount).toFixed(2)}
+      </p>
+    </div>
+  </div>
+</Link>
                 ))
               )}
 
@@ -541,15 +664,20 @@ export default async function AdminDashboard() {
                     className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
                   >
 
-                    <td className="px-6 py-5">
-                      <p className="text-sm font-black text-slate-900">
-                        {ad.title}
-                      </p>
+         <td className="px-6 py-5">
+  <Link
+    href={`/admin/advertisements/${ad.id}`}
+    className="group block"
+  >
+    <p className="text-sm font-black text-slate-900 group-hover:text-blue-700">
+      {ad.title}
+    </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
-                        {ad.category}
-                      </p>
-                    </td>
+    <p className="mt-1 text-xs text-slate-400">
+      {ad.category}
+    </p>
+  </Link>
+</td>
 
                     <td className="px-6 py-5 text-sm font-semibold text-slate-700">
                       {ad.advertiser.businessName}
@@ -569,14 +697,14 @@ export default async function AdminDashboard() {
                       {formatDate(ad.createdAt)}
                     </td>
 
-                    <td className="px-6 py-5">
-                      <Link
-                        href={`/admin/advertisements/${ad.id}`}
-                        className="inline-flex rounded-lg bg-blue-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-900"
-                      >
-                        Review
-                      </Link>
-                    </td>
+                   <td className="px-6 py-5">
+  <Link
+    href={`/admin/advertisements/${ad.id}`}
+    className="inline-flex items-center rounded-lg bg-blue-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-900"
+  >
+    Review →
+  </Link>
+</td>
 
                   </tr>
                 ))}

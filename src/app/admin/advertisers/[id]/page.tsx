@@ -277,16 +277,24 @@ export default async function AdvertiserDetailsPage({
                 <tbody className="divide-y divide-slate-100">
                   {advertiser.ads.map((ad) => (
                     <tr key={ad.id}>
-                      <td className="px-6 py-5">
-                        <p className="font-bold text-slate-900">
-                          {ad.title}
-                        </p>
+                     <td className="px-6 py-5">
+  <Link
+    href={`/admin/advertisements/${ad.id}`}
+    className="group block"
+  >
+    <p className="font-bold text-slate-900 group-hover:text-blue-700">
+      {ad.title}
+    </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
-                          {ad.mediaType}
-                        </p>
-                      </td>
+    <p className="mt-1 text-xs text-slate-400">
+      {ad.mediaType}
+    </p>
 
+    <p className="mt-2 text-xs font-bold text-blue-600">
+      Review advertisement →
+    </p>
+  </Link>
+</td>
                       <td className="px-6 py-5 text-sm text-slate-600">
                         {ad.category}
                       </td>
@@ -381,10 +389,19 @@ export default async function AdvertiserDetailsPage({
                   {advertiser.orders.map((order) => (
                     <tr key={order.id}>
                       <td className="px-6 py-5">
-                        <p className="font-bold text-slate-900">
-                          {order.orderNumber}
-                        </p>
-                      </td>
+  <Link
+    href={`/admin/orders/${order.id}`}
+    className="group block"
+  >
+    <p className="font-bold text-slate-900 group-hover:text-blue-700">
+      {order.orderNumber}
+    </p>
+
+    <p className="mt-2 text-xs font-bold text-blue-600">
+      View order →
+    </p>
+  </Link>
+</td>
 
                       <td className="px-6 py-5">
                         <p className="font-semibold text-slate-700">
@@ -401,9 +418,19 @@ export default async function AdvertiserDetailsPage({
                       </td>
 
                       <td className="px-6 py-5">
-                        <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
-                          {order.status}
-                        </span>
+                       <span
+  className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+    order.status.toLowerCase() === "paid"
+      ? "bg-green-100 text-green-700"
+      : order.status.toLowerCase() === "payment_rejected"
+      ? "bg-red-100 text-red-700"
+      : order.status.toLowerCase() === "pending"
+      ? "bg-amber-100 text-amber-700"
+      : "bg-slate-100 text-slate-700"
+  }`}
+>
+  {order.status}
+</span>
                       </td>
 
                       <td className="px-6 py-5">
