@@ -74,10 +74,10 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
 
         <div>
           <div className="text-lg font-black text-blue-900">
-            MaronderaBillboard
+        ZimDigitalBillboard    
           </div>
           <div className="text-xs text-slate-500">
-            Your Local Advertising Platform
+            Zimbabwe's Digital Advertising Platform
           </div>
         </div>
       </a>
@@ -108,12 +108,21 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
           Pricing
         </a>
 
-        <a
-          href="/advertise"
-          className="rounded-lg bg-yellow-400 px-5 py-3 text-sm font-bold text-blue-950 shadow-sm transition hover:bg-yellow-300"
-        >
-          Advertise Now
-        </a>
+       <div className="flex items-center gap-3">
+  <a
+    href="/login"
+    className="rounded-lg px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-900"
+  >
+    Log in
+  </a>
+
+  <a
+    href="/signup"
+    className="rounded-lg bg-yellow-400 px-5 py-3 text-sm font-bold text-blue-950 shadow-sm transition hover:bg-yellow-300"
+  >
+    Get Started
+  </a>
+</div>
       </nav>
 
       <button
@@ -144,12 +153,19 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
             Pricing
           </a>
 
-          <a
-            href="/advertise"
-            className="rounded-lg bg-yellow-400 px-4 py-3 text-center font-bold text-blue-950"
-          >
-            Advertise Now
-          </a>
+        <a
+  href="/login"
+  className="rounded-lg border border-slate-200 px-4 py-3 text-center font-bold text-slate-700"
+>
+  Log in
+</a>
+
+<a
+  href="/signup"
+  className="rounded-lg bg-yellow-400 px-4 py-3 text-center font-bold text-blue-950"
+>
+  Get Started
+</a>
 
         </div>
       </div>
@@ -316,7 +332,7 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
 
         <p className="mt-3 max-w-xl text-slate-500">
           Discover businesses, products, services and special offers
-          currently being promoted on MaronderaBillboard.
+          currently being promoted on ZimDigitalBillboard.
         </p>
       </div>
 
@@ -770,7 +786,7 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
     </div>
 
     <div className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
-      © {new Date().getFullYear()} MaronderaBillboard. All rights reserved.
+      © {new Date().getFullYear()} ZimDigitalBillboard. All rights reserved.
     </div>
 
   </footer>
