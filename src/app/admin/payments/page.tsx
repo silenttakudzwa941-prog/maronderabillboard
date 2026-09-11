@@ -16,12 +16,13 @@ export default async function PaymentsPage() {
     include: {
       order: {
         include: {
-          advertiser: {
-            select: {
-              businessName: true,
-              email: true,
-            },
-          },
+        advertiser: {
+  select: {
+    id: true,
+    businessName: true,
+    email: true,
+  },
+},
         },
       },
     },
