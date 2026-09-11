@@ -381,7 +381,7 @@ export default async function AdminDashboard() {
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
             <Link
-              href="/admin/advertisements"
+              href="/admin/advertisements?status=pending"
               className="group rounded-2xl border border-yellow-200 bg-yellow-50 p-5 transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="flex items-center justify-between">

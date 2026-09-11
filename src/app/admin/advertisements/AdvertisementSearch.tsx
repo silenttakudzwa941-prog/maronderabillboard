@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 type Advertisement = {
   id: string;
@@ -25,11 +26,27 @@ type AdvertisementSearchProps = {
 export default function AdvertisementSearch({
   advertisements,
 }: AdvertisementSearchProps) {
+  const searchParams = useSearchParams();
+
   const [search, setSearch] = useState("");
 
   const [statusFilter, setStatusFilter] = useState<
     "all" | "pending" | "active" | "rejected"
   >("all");
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+
+    if (
+      status === "pending" ||
+      status === "active" ||
+      status === "rejected"
+    ) {
+      setStatusFilter(status);
+    } else {
+      setStatusFilter("all");
+    }
+  }, [searchParams]);
 
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "mostViews" | "leastViews"
