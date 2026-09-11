@@ -124,7 +124,28 @@ async function handleLogout() {
                     {item.icon}
                   </span>
 
-                  <span>{item.name}</span>
+                 <span className="flex-1">{item.name}</span>
+
+{item.name === "Advertisements" &&
+  attention.pendingAds > 0 && (
+    <span className="min-w-[24px] rounded-full bg-amber-500 px-2 py-1 text-center text-[11px] font-black text-white">
+      {attention.pendingAds}
+    </span>
+  )}
+
+{item.name === "Orders" &&
+  attention.pendingOrders > 0 && (
+    <span className="min-w-[24px] rounded-full bg-red-500 px-2 py-1 text-center text-[11px] font-black text-white">
+      {attention.pendingOrders}
+    </span>
+  )}
+
+{item.name === "Payments" &&
+  attention.pendingPayments > 0 && (
+    <span className="min-w-[24px] rounded-full bg-purple-500 px-2 py-1 text-center text-[11px] font-black text-white">
+      {attention.pendingPayments}
+    </span>
+  )} 
                 </Link>
               );
             })}

@@ -266,61 +266,100 @@ export default async function AdminDashboard() {
 
         </div>
 
-        {/* Attention Cards */}
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+      {/* Attention Center */}
+<div className="mt-8">
+  <div className="mb-4">
+    <h2 className="text-xl font-black text-slate-900">
+      Needs Attention
+    </h2>
 
-          <Link
-            href="/admin/advertisements"
-            className="rounded-2xl border border-yellow-200 bg-yellow-50 p-6 transition hover:shadow-md"
-          >
-            <p className="text-sm font-bold text-yellow-700">
-              Advertisements Awaiting Review
-            </p>
+    <p className="mt-1 text-sm text-slate-500">
+      Items that may require your review or action.
+    </p>
+  </div>
 
-            <p className="mt-2 text-3xl font-black text-yellow-900">
-              {pendingAdvertisementCount}
-            </p>
+  <div className="grid gap-4 md:grid-cols-3">
 
-            <p className="mt-2 text-sm text-yellow-700">
-              Review pending advertisements →
-            </p>
-          </Link>
+    {/* Advertisements */}
+    <Link
+      href="/admin/advertisements"
+      className="group rounded-2xl border border-yellow-200 bg-yellow-50 p-6 transition hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold text-yellow-700">
+            Advertisements Awaiting Review
+          </p>
 
-          <Link
-            href="/admin/orders"
-            className="rounded-2xl border border-blue-200 bg-blue-50 p-6 transition hover:shadow-md"
-          >
-            <p className="text-sm font-bold text-blue-700">
-              Pending Orders
-            </p>
-
-            <p className="mt-2 text-3xl font-black text-blue-950">
-              {pendingOrderCount}
-            </p>
-
-            <p className="mt-2 text-sm text-blue-700">
-              Review pending orders →
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/payments"
-            className="rounded-2xl border border-green-200 bg-green-50 p-6 transition hover:shadow-md"
-          >
-            <p className="text-sm font-bold text-green-700">
-              Payments Awaiting Verification
-            </p>
-
-            <p className="mt-2 text-3xl font-black text-green-900">
-              {pendingPaymentCount}
-            </p>
-
-            <p className="mt-2 text-sm text-green-700">
-              Review payments →
-            </p>
-          </Link>
-
+          <p className="mt-2 text-3xl font-black text-yellow-900">
+            {pendingAdvertisementCount}
+          </p>
         </div>
+
+        <span className="text-2xl">
+          📢
+        </span>
+      </div>
+
+      <p className="mt-4 text-sm font-bold text-yellow-700 group-hover:text-yellow-900">
+        Review advertisements →
+      </p>
+    </Link>
+
+    {/* Orders */}
+    <Link
+      href="/admin/orders"
+      className="group rounded-2xl border border-blue-200 bg-blue-50 p-6 transition hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold text-blue-700">
+            Pending Orders
+          </p>
+
+          <p className="mt-2 text-3xl font-black text-blue-950">
+            {pendingOrderCount}
+          </p>
+        </div>
+
+        <span className="text-2xl">
+          🧾
+        </span>
+      </div>
+
+      <p className="mt-4 text-sm font-bold text-blue-700 group-hover:text-blue-900">
+        Review orders →
+      </p>
+    </Link>
+
+    {/* Payments */}
+    <Link
+      href="/admin/payments"
+      className="group rounded-2xl border border-green-200 bg-green-50 p-6 transition hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-bold text-green-700">
+            Payments Awaiting Verification
+          </p>
+
+          <p className="mt-2 text-3xl font-black text-green-900">
+            {pendingPaymentCount}
+          </p>
+        </div>
+
+        <span className="text-2xl">
+          💳
+        </span>
+      </div>
+
+      <p className="mt-4 text-sm font-bold text-green-700 group-hover:text-green-900">
+        Review payments →
+      </p>
+    </Link>
+
+  </div>
+</div>
         {/* Quick Actions */}
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div>
