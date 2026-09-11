@@ -20,6 +20,7 @@ export default async function AdminDashboard() {
     pendingAdvertisementCount,
     pendingOrderCount,
     pendingPaymentCount,
+    unpaidOrderCount,
     verifiedPayments,
     recentOrders,
     recentPayments,
@@ -50,6 +51,11 @@ export default async function AdminDashboard() {
         status: "pending",
       },
     }),
+    prisma.order.count({
+  where: {
+    payment: null,
+  },
+}),
 
     prisma.payment.count({
       where: {
@@ -314,12 +320,12 @@ export default async function AdminDashboard() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-bold text-blue-700">
-            Pending Orders
-          </p>
+  Orders Awaiting Payment
+</p>
 
-          <p className="mt-2 text-3xl font-black text-blue-950">
-            {pendingOrderCount}
-          </p>
+<p className="mt-2 text-3xl font-black text-blue-950">
+  {unpaidOrderCount}
+</p>
         </div>
 
         <span className="text-2xl">
@@ -327,9 +333,9 @@ export default async function AdminDashboard() {
         </span>
       </div>
 
-      <p className="mt-4 text-sm font-bold text-blue-700 group-hover:text-blue-900">
-        Review orders →
-      </p>
+  <p className="mt-4 text-sm font-bold text-blue-700 group-hover:text-blue-900">
+  Review unpaid orders →
+</p>
     </Link>
 
     {/* Payments */}

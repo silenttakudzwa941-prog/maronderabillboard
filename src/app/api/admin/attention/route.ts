@@ -13,9 +13,12 @@ export async function GET() {
         { status: 401 }
       );
     }
-
-    const [pendingAds, pendingPayments, pendingOrders] =
-      await Promise.all([
+const [
+  pendingAds,
+  pendingPayments,
+  pendingOrders,
+  unpaidOrders,
+] = await Promise.all([
         prisma.ad.count({
           where: {
             status: "pending",
@@ -33,13 +36,19 @@ export async function GET() {
             status: "pending",
           },
         }),
+        prisma.order.count({
+  where: {
+    payment: null,
+  },
+}),
       ]);
 
-    return NextResponse.json({
-      pendingAds,
-      pendingPayments,
-      pendingOrders,
-    });
+   return NextResponse.json({
+  pendingAds,
+  pendingPayments,
+  pendingOrders,
+  unpaidOrders,
+});
   } catch (error) {
     console.error("Admin attention error:", error);
 

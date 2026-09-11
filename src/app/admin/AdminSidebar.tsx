@@ -39,11 +39,12 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [attention, setAttention] = useState({
-    pendingAds: 0,
-    pendingPayments: 0,
-    pendingOrders: 0,
-  });
+const [attention, setAttention] = useState({
+  pendingAds: 0,
+  pendingPayments: 0,
+  pendingOrders: 0,
+  unpaidOrders: 0,
+});
     useEffect(() => {
     async function loadAttention() {
       try {
@@ -56,10 +57,11 @@ export default function AdminSidebar() {
         const data = await response.json();
 
         setAttention({
-          pendingAds: data.pendingAds ?? 0,
-          pendingPayments: data.pendingPayments ?? 0,
-          pendingOrders: data.pendingOrders ?? 0,
-        });
+  pendingAds: data.pendingAds ?? 0,
+  pendingPayments: data.pendingPayments ?? 0,
+  pendingOrders: data.pendingOrders ?? 0,
+  unpaidOrders: data.unpaidOrders ?? 0,
+});
       } catch {
         // Keep sidebar usable if the attention request fails.
       }
@@ -134,9 +136,9 @@ async function handleLogout() {
   )}
 
 {item.name === "Orders" &&
-  attention.pendingOrders > 0 && (
+  attention.unpaidOrders > 0 && (
     <span className="min-w-[24px] rounded-full bg-red-500 px-2 py-1 text-center text-[11px] font-black text-white">
-      {attention.pendingOrders}
+      {attention.unpaidOrders}
     </span>
   )}
 
