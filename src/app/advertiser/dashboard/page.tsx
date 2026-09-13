@@ -85,13 +85,19 @@ export default function AdvertiserDashboard() {
           error: userError,
         } = await supabase.auth.getUser();
 
-        if (userError || !user) {
-          router.replace("/advertiser/login");
-          return;
-        }
+       console.log("DASHBOARD AUTH USER:", user);
+console.log("DASHBOARD AUTH ERROR:", userError);
 
-        const response = await fetch("/api/advertiser/profile");
-
+if (userError || !user) {
+  console.log("NO AUTH USER - REDIRECTING TO LOGIN");
+  router.replace("/advertiser/login");
+  return;
+}
+console.log("CALLING ADVERTISER PROFILE API...");
+        const response = await fetch("/api/advertiser/profile", {
+  cache: "no-store",
+});
+console.log("PROFILE API STATUS:", response.status);
         if (!response.ok) {
           if (response.status === 401) {
             router.replace("/advertiser/login");
@@ -102,7 +108,7 @@ export default function AdvertiserDashboard() {
         }
 
         const data = await response.json();
-
+console.log("PROFILE API DATA:", data);
         setAdvertiser({
           id: data.id || user.id,
           businessName: data.businessName || "",
