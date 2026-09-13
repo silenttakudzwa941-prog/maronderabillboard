@@ -15,6 +15,7 @@ function AdvertiserLoginContent() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
