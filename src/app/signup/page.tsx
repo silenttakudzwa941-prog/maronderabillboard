@@ -72,15 +72,17 @@ export default function SignupPage() {
     }
 
     const response = await fetch("/api/advertiser/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        businessName: businessName.trim(),
-        phone: phone.trim(),
-      }),
-    });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    businessName: businessName.trim(),
+    email: email.trim().toLowerCase(),
+    phone: phone.trim(),
+    password,
+  }),
+});
 
     const data = await response.json();
 

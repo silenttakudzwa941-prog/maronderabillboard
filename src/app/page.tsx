@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTiktok,
+  FaWhatsapp,
+  FaYoutube,
+  FaTwitter,
+} from "react-icons/fa";
+import { FaGlobe } from "react-icons/fa";
 const mockAds = [
 {
 id: 1,
@@ -59,6 +67,15 @@ description: "Maximum exposure for growing businesses.",
 
 export default function Home() {
 const [menuOpen, setMenuOpen] = useState(false);
+const socialIcons: Record<string, React.ReactNode> = {
+  Website: <FaGlobe className="text-slate-600" />,
+  Facebook: <FaFacebookF className="text-blue-600" />,
+  Instagram: <FaInstagram className="text-pink-500" />,
+  TikTok: <FaTiktok className="text-black" />,
+  WhatsApp: <FaWhatsapp className="text-green-500" />,
+  YouTube: <FaYoutube className="text-red-600" />,
+  Twitter: <FaTwitter className="text-blue-500" />,
+};
 
 return ( <main className="min-h-screen bg-slate-50 text-slate-900">
 
@@ -408,7 +425,7 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
 
       <div className="mx-auto max-w-2xl text-center">
         <div className="text-sm font-black uppercase tracking-widest text-blue-700">
-          Why MaronderaBillboard?
+          Why Zim Digital Billboards?
         </div>
 
         <h2 className="mt-3 text-3xl font-black md:text-4xl">
@@ -614,9 +631,7 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
 
       <div>
 
-        <div className="text-sm font-black uppercase tracking-widest text-yellow-400">
-          Coming Soon
-        </div>
+       
 
         <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">
           One Advertisement.
@@ -630,25 +645,39 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
           across the platforms where your customers spend their time.
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+    <div className="mt-8 flex flex-wrap gap-3">
 
-          <span className="rounded-full bg-white px-5 py-3 font-bold text-slate-900">
-            Facebook
-          </span>
+  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
+    <FaFacebookF className="text-blue-600" />
+    Facebook
+  </span>
 
-          <span className="rounded-full bg-white px-5 py-3 font-bold text-slate-900">
-            Instagram
-          </span>
+  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
+    <FaInstagram className="text-pink-500" />
+    Instagram
+  </span>
 
-          <span className="rounded-full bg-white px-5 py-3 font-bold text-slate-900">
-            TikTok
-          </span>
+  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
+    <FaTiktok className="text-black" />
+    TikTok
+  </span>
 
-          <span className="rounded-full bg-white px-5 py-3 font-bold text-slate-900">
-            WhatsApp
-          </span>
+  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
+    <FaWhatsapp className="text-green-500" />
+    WhatsApp
+  </span>
 
-        </div>
+  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
+    <FaYoutube className="text-red-600" />
+    YouTube
+  </span>
+
+  <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
+    <FaTwitter className="text-blue-500" />
+    Twitter
+  </span>
+
+</div>
 
       </div>
 
@@ -667,24 +696,33 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
           <div className="mt-6 space-y-3">
 
             {[
+              
               "Website",
               "Facebook",
               "Instagram",
               "TikTok",
               "WhatsApp",
-            ].map((platform) => (
+              "YouTube",
+              "Twitter",
+            ].map((platform) =>
+               (
+              
               <div
-                key={platform}
-                className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
-              >
-                <span className="font-semibold">
-                  {platform}
-                </span>
+  key={platform}
+  className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
+>
+  <span className="flex items-center gap-3 font-semibold">
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+      {socialIcons[platform]}
+    </span>
 
-                <span className="font-bold text-green-500">
-                  ✓
-                </span>
-              </div>
+    {platform}
+  </span>
+
+  <span className="font-bold text-green-500">
+    ✓
+  </span>
+</div>
             ))}
 
           </div>
@@ -718,7 +756,7 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
         href="/advertise"
         className="mt-8 inline-block rounded-xl bg-blue-950 px-8 py-4 font-black text-white shadow-lg transition hover:bg-blue-900"
       >
-        Advertise on MaronderaBillboard →
+        Advertise on Zim Digital Billboards →
       </a>
 
     </div>
@@ -726,70 +764,194 @@ return ( <main className="min-h-screen bg-slate-50 text-slate-900">
   </section>
 
   {/* FOOTER */}
-  <footer className="bg-slate-950 text-white">
+ <footer className="bg-slate-950 text-white">
+  <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4">
 
-    <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4">
+    {/* Brand */}
+    <div className="md:col-span-2">
+      <h2 className="text-2xl font-black text-white">
+        Zim Digital Billboards
+      </h2>
 
-      <div className="md:col-span-2">
+      <p className="mt-4 max-w-xl text-slate-400">
+        A digital advertising platform connecting businesses, products and
+        services with customers across Zimbabwe.
+      </p>
 
-        <div className="text-2xl font-black">
-          MaronderaBillboard
-        </div>
-
-        <p className="mt-4 max-w-md leading-7 text-slate-400">
-          A local digital advertising platform connecting businesses,
-          products and services with customers in Marondera.
-        </p>
-
-      </div>
-
-      <div>
-        <h3 className="font-black">
-          Platform
+      {/* Follow Us */}
+      <div className="mt-6">
+        <h3 className="font-black text-white">
+          Follow Us
         </h3>
 
-        <div className="mt-4 space-y-3 text-sm text-slate-400">
+        <div className="mt-4 flex flex-wrap gap-3">
 
-          <a href="#advertisements" className="block hover:text-white">
-            Browse Ads
+          <a
+            href="https://wa.me/263718299260"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white transition hover:scale-110 hover:bg-green-400"
+          >
+            <FaWhatsapp className="text-xl" />
           </a>
 
-          <a href="#pricing" className="block hover:text-white">
-            Pricing
+          <a
+            href="#"
+            aria-label="Facebook"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white transition hover:scale-110 hover:bg-blue-500"
+          >
+            <FaFacebookF className="text-lg" />
           </a>
 
-          <a href="#how-it-works" className="block hover:text-white">
-            How It Works
+          <a
+            href="#"
+            aria-label="Instagram"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 text-white transition hover:scale-110 hover:bg-pink-400"
+          >
+            <FaInstagram className="text-xl" />
           </a>
 
-          <a href="/advertise" className="block hover:text-white">
-            Advertise
+          <a
+            href="#"
+            aria-label="TikTok"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white ring-1 ring-slate-700 transition hover:scale-110"
+          >
+            <FaTiktok className="text-lg" />
+          </a>
+
+          <a
+            href="#"
+            aria-label="Twitter"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500 text-white transition hover:scale-110 hover:bg-sky-400"
+          >
+            <FaTwitter className="text-lg" />
+          </a>
+
+          <a
+            href="#"
+            aria-label="YouTube"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white transition hover:scale-110 hover:bg-red-500"
+          >
+            <FaYoutube className="text-lg" />
           </a>
 
         </div>
       </div>
+    </div>
 
-      <div>
-        <h3 className="font-black">
-          Contact
-        </h3>
+    {/* Platform */}
+    <div>
+      <h3 className="font-black text-white">
+        Platform
+      </h3>
 
-        <div className="mt-4 space-y-3 text-sm text-slate-400">
+      <div className="mt-4 space-y-3 text-sm text-slate-400">
 
-          <div>📍 Marondera, Zimbabwe</div>
-          <div>📱 WhatsApp</div>
-          <div>✉️ Email</div>
+        <a
+          href="#advertisements"
+          className="block transition hover:text-white"
+        >
+          Browse Ads
+        </a>
 
-        </div>
+        <a
+          href="#pricing"
+          className="block transition hover:text-white"
+        >
+          Pricing
+        </a>
+
+        <a
+          href="#how-it-works"
+          className="block transition hover:text-white"
+        >
+          How It Works
+        </a>
+
+        <a
+          href="/advertise"
+          className="block transition hover:text-white"
+        >
+          Advertise
+        </a>
+
       </div>
-
     </div>
 
-    <div className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
-      © {new Date().getFullYear()} ZimDigitalBillboard. All rights reserved.
+    {/* Contact */}
+    <div>
+      <h3 className="font-black text-white">
+        Contact
+      </h3>
+
+      <div className="mt-4 space-y-4 text-sm text-slate-400">
+
+        <div>
+          📍 Marondera, Zimbabwe
+        </div>
+
+        <a
+          href="tel:+263718299260"
+          className="block transition hover:text-white"
+        >
+          📱 0718 299 260
+        </a>
+
+        <a
+          href="tel:+263716893336"
+          className="block transition hover:text-white"
+        >
+          📱 0716 893 336
+        </a>
+
+        <a
+          href="mailto:zimdigitalbillboards941@gmail.com"
+          className="block break-all transition hover:text-white"
+        >
+          ✉️ zimdigitalbillboards941@gmail.com
+        </a>
+
+      </div>
     </div>
 
-  </footer>
+  </div>
 
+  {/* Bottom Bar */}
+  <div className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
+
+    <p>
+      © {new Date().getFullYear()} Zim Digital Billboards. All rights reserved.
+    </p>
+    <div className="mt-3 flex flex-wrap justify-center gap-4">
+  <a
+    href="/privacy"
+    className="transition hover:text-white"
+  >
+    Privacy Policy
+  </a>
+
+  <a
+    href="/terms"
+    className="transition hover:text-white"
+  >
+    Terms & Conditions
+  </a>
+</div>
+
+    <p className="mt-2">
+      Created by{" "}
+      <a
+        href="https://wa.me/263775496377"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-bold text-white transition hover:text-green-400"
+      >
+        Silent Programs
+      </a>
+    </p>
+
+  </div>
+</footer>
 </main>);
 }

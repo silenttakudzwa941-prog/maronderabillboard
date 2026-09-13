@@ -319,8 +319,12 @@ const advertiser = await prisma.advertiser.upsert({
             duration:
               selectedPackage.duration,
 
-            category:
-              location?.trim() || "General",
+            category: "General",
+
+location:
+  typeof location === "string" && location.trim()
+    ? location.trim()
+    : "Marondera CBD",
 
             status: "pending",
 
@@ -382,24 +386,30 @@ const advertiser = await prisma.advertiser.upsert({
           result.order.createdAt,
       },
 
-      advertisement: {
-        id: result.ad.id,
+     advertisement: {
+  id: result.ad.id,
 
-        title:
-          result.ad.title,
+  title:
+    result.ad.title,
 
-        mediaUrl:
-          result.ad.mediaUrl,
+  mediaUrl:
+    result.ad.mediaUrl,
 
-        mediaType:
-          result.ad.mediaType,
+  mediaType:
+    result.ad.mediaType,
 
-        duration:
-          result.ad.duration,
+  duration:
+    result.ad.duration,
 
-        status:
-          result.ad.status,
-      },
+  category:
+    result.ad.category,
+
+  location:
+    result.ad.location,
+
+  status:
+    result.ad.status,
+},
 
       payment: result.order.payment
         ? {

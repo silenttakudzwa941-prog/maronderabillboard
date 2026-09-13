@@ -34,11 +34,19 @@ const packages = {
 };
 
 const locations = [
-  "Marondera CBD",
-  "Marondera East",
-  "Marondera West",
-  "Harare Road",
-  "Mutoko Road",
+  "Harare",
+  "Bulawayo",
+  "Chitungwiza",
+  "Mutare",
+  "Gweru",
+  "Masvingo",
+  "Marondera",
+  "Kwekwe",
+  "Kadoma",
+  "Chinhoyi",
+  "Victoria Falls",
+  "Bindura",
+  "Other",
 ];
 
 const socialPlatformPricing = {
@@ -181,9 +189,9 @@ function CreateAdvertisementContent() {
       missingFields.push("WhatsApp Number");
     }
 
-    if (!location) {
-      missingFields.push("Billboard Location");
-    }
+   if (!location) {
+  missingFields.push("Advertising Area");
+}
 
     if (!startDate) {
       missingFields.push("Start Date");
@@ -315,7 +323,7 @@ function CreateAdvertisementContent() {
 
             <div>
               <div className="text-lg font-black text-blue-900">
-                MaronderaBillboard
+                ZimDigitalBillboard
               </div>
 
               <div className="text-xs text-slate-500">
@@ -624,12 +632,12 @@ function CreateAdvertisementContent() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                MaronderaBillboard is included with every
-                advertising package. You can also choose
-                additional social media platforms.
+             ZimDigitalBillboard is included with every
+advertising package. You can also choose
+additional social media platforms.
               </p>
 
-              {/* MARONDERA BILLBOARD */}
+              {/* ZIMDIGITAL BILLBOARD */}
               <div className="mt-6 rounded-2xl border-2 border-blue-900 bg-blue-50 p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
@@ -792,7 +800,7 @@ function CreateAdvertisementContent() {
                             platform.slice(1)
                         )
                         .join(", ")
-                    : "MaronderaBillboard only"}
+                    : "ZimDigitalBillboard only"}
                 </div>
 
                 {/* SOCIAL MEDIA COST */}
@@ -895,14 +903,13 @@ function CreateAdvertisementContent() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Choose where and when your advertisement should
-                run.
+                Choose the area where your advertisement should be displayed and when it should run.
               </p>
 
               <div className="mt-6 grid gap-5 md:grid-cols-3">
                 <div>
                   <label className="mb-2 block text-sm font-bold text-slate-700">
-                    Billboard Location *
+                    Advertising Area *
                   </label>
 
                   <select
@@ -1192,8 +1199,7 @@ function CreateAdvertisementContent() {
 
       {/* FOOTER */}
       <footer className="bg-slate-950 px-6 py-8 text-center text-sm text-slate-400">
-        © {new Date().getFullYear()} MaronderaBillboard. All
-        rights reserved.
+        © {new Date().getFullYear()} ZimDigitalBillboard. Silent Programs. All rights reserved.
       </footer>
     </main>
   );

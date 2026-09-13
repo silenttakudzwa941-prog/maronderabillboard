@@ -3,11 +3,11 @@
 
 import { FormEvent, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+
 function AdvertiserSignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  
 
   const redirectPath =
     searchParams.get("redirect") || "/advertiser/dashboard";
@@ -21,59 +21,88 @@ function AdvertiserSignupContent() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  async function handleSignup(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+async function handleSignup(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
 
-    setLoading(true);
-    setError("");
-    setMessage("");
+  setLoading(true);
+  setError("");
+  setMessage("");
 
-    try {
-      const callbackUrl = new URL(
-        "/auth/callback",
-        window.location.origin
-      );
-
-      callbackUrl.searchParams.set("redirect", redirectPath);
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-
-        options: {
-          data: {
-            businessName,
-            phone,
-          },
-
-          emailRedirectTo: callbackUrl.toString(),
-        },
-      });
-
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!data.user) {
-        setError("Account could not be created.");
-        setLoading(false);
-        return;
-      }
-
-      setMessage(
-        "Account created successfully. Please check your email to confirm your account."
-      );
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Signup error:", error);
-
-      setError("Something went wrong while creating your account.");
-      setLoading(false);
+  try {
+    if (!businessName.trim()) {
+      setError("Please enter your business name.");
+      return;
     }
+
+    if (!phone.trim()) {
+      setError("Please enter your phone number.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter a password.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+console.log("FRONTEND SIGNUP DATA:", {
+  businessName: businessName.trim(),
+  phone: phone.trim(),
+  email: email.trim(),
+  password,
+});
+
+console.log(
+  "JSON BEING SENT:",
+  JSON.stringify({
+    businessName: businessName.trim(),
+    phone: phone.trim(),
+    email: email.trim(),
+    password,
+  })
+);
+    const response = await fetch("/api/advertiser/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        businessName: businessName.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        password,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setError(result.error || "Unable to create your account.");
+      return;
+    }
+
+    setMessage(
+      result.message ||
+        "Account created successfully. Please check your email to confirm your account."
+    );
+  } catch (error) {
+    console.error("Signup request error:", error);
+
+    setError(
+      "Unable to connect to the server. Please try again."
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
@@ -92,7 +121,7 @@ function AdvertiserSignupContent() {
           </h1>
 
           <p className="mt-2 text-sm text-slate-600">
-            Create an account to advertise on MaronderaBillboard.
+            Create an account to advertise on Zim Digital Billboards.
           </p>
 
           {redirectPath !== "/advertiser/dashboard" && (
@@ -189,7 +218,36 @@ function AdvertiserSignupContent() {
                 </p>
               </div>
             )}
+<label className="flex items-start gap-3">
+  <input
+    type="checkbox"
+    name="terms"
+    required
+    className="mt-1"
+  />
 
+  <span className="text-sm text-slate-600">
+    I agree to the{" "}
+    <a
+      href="/terms"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-semibold text-green-600 hover:underline"
+    >
+      Terms & Conditions
+    </a>{" "}
+    and{" "}
+    <a
+      href="/privacy"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-semibold text-green-600 hover:underline"
+    >
+      Privacy Policy
+    </a>
+    .
+  </span>
+</label>
             <button
               type="submit"
               disabled={loading}
