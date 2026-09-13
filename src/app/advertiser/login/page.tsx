@@ -19,26 +19,84 @@ function AdvertiserLoginContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+ async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setErrorMessage("");
 
+  try {
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
     if (error) {
-      setError(error.message);
+      setErrorMessage(
+        error.message === "Invalid login credentials"
+          ? "Incorrect email or password."
+          : error.message
+      );
+
       setLoading(false);
       return;
     }
 
-    router.push(redirectPath);
-    router.refresh();
+    /*
+     * Give Supabase a moment to persist the session
+     * before navigating.
+     */
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    /*
+     * Check whether this user is an admin.
+     *
+     * The timeout prevents Safari/iPhone from getting
+     * stuck waiting forever if the request hangs.
+     */
+    let isAdmin = false;
+
+    try {
+      const controller = new AbortController();
+
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, 5000);
+
+      const response = await fetch("/api/admin/check", {
+        method: "GET",
+        cache: "no-store",
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      isAdmin = response.ok;
+    } catch (error) {
+      console.log("Admin check skipped:", error);
+    }
+
+    /*
+     * Use a full browser navigation instead of router.push().
+     *
+     * This is more reliable for Safari/iPhone because the
+     * Supabase session cookie has already been stored.
+     */
+    if (isAdmin) {
+      window.location.href = "/admin/dashboard";
+    } else {
+      window.location.href = "/advertise";
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+
+    setErrorMessage(
+      "Unable to log in right now. Please check your connection and try again."
+    );
+
+    setLoading(false);
   }
+}
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
