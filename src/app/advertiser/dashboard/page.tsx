@@ -67,66 +67,251 @@ type Order = {
 
 export default function AdvertiserDashboard() {
   const router = useRouter();
-  const supabase = createClient();
 
-  const [advertiser, setAdvertiser] = useState<Advertiser | null>(null);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
+  /*
+   * IMPORTANT:
+   * Create the Supabase browser client only once.
+   * This prevents Safari/iOS from repeatedly creating
+   * new clients during re-renders.
+   */
+  const [supabase] = useState(() => createClient());
+
+  const [advertiser, setAdvertiser] =
+    useState<Advertiser | null>(null);
+
+  const [stats, setStats] =
+    useState<DashboardStats | null>(null);
+
+  const [ads, setAds] =
+    useState<Advertisement[]>([]);
+
+  const [orders, setOrders] =
+    useState<Order[]>([]);
 
   const [loading, setLoading] = useState(true);
-  const [loggingOut, setLoggingOut] = useState(false);
+
+  const [loggingOut, setLoggingOut] =
+    useState(false);
+
+  const [loadingMessage, setLoadingMessage] =
+    useState("Checking your login session...");
+
+  const [dashboardError, setDashboardError] =
+    useState("");
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadDashboard() {
       try {
+        setLoading(true);
+        setDashboardError("");
+        setLoadingMessage("Checking your login session...");
+
+        console.log("DASHBOARD: Starting load");
+
+        /*
+         * STEP 1
+         * Check Supabase authentication.
+         */
         const {
           data: { user },
           error: userError,
         } = await supabase.auth.getUser();
 
-       console.log("DASHBOARD AUTH USER:", user);
-console.log("DASHBOARD AUTH ERROR:", userError);
+        console.log("DASHBOARD AUTH USER:", user);
+        console.log("DASHBOARD AUTH ERROR:", userError);
 
-if (userError || !user) {
-  console.log("NO AUTH USER - REDIRECTING TO LOGIN");
-  router.replace("/advertiser/login");
-  return;
-}
-console.log("CALLING ADVERTISER PROFILE API...");
-        const response = await fetch("/api/advertiser/profile", {
-  cache: "no-store",
-});
-console.log("PROFILE API STATUS:", response.status);
-        if (!response.ok) {
-          if (response.status === 401) {
-            router.replace("/advertiser/login");
-            return;
-          }
+        if (cancelled) return;
 
-          throw new Error("Failed to load advertiser dashboard");
+        if (userError) {
+          console.error(
+            "DASHBOARD AUTH ERROR:",
+            userError
+          );
+
+          setDashboardError(
+            `Safari could not verify your login session: ${userError.message}`
+          );
+
+          return;
         }
 
+        if (!user) {
+          console.log("NO AUTH USER");
+
+          setDashboardError(
+            "Your login session could not be found. Please log in again."
+          );
+
+          return;
+        }
+
+        console.log(
+          "AUTHENTICATED USER:",
+          user.id
+        );
+
+        /*
+         * STEP 2
+         * Load advertiser profile.
+         */
+        setLoadingMessage(
+          "Login confirmed. Loading your advertiser profile..."
+        );
+
+        console.log(
+          "CALLING ADVERTISER PROFILE API..."
+        );
+
+        const controller = new AbortController();
+
+        const timeout = setTimeout(() => {
+          controller.abort();
+        }, 10000);
+
+        let response: Response;
+
+        try {
+          response = await fetch(
+            "/api/advertiser/profile",
+            {
+              method: "GET",
+              cache: "no-store",
+              credentials: "include",
+              signal: controller.signal,
+            }
+          );
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        console.log(
+          "PROFILE API STATUS:",
+          response.status
+        );
+
+        if (cancelled) return;
+
+        if (response.status === 401) {
+          setDashboardError(
+            "Your login session was not accepted by the server. Please log in again."
+          );
+
+          return;
+        }
+
+        if (!response.ok) {
+          setDashboardError(
+            `The advertiser profile could not be loaded. Server returned ${response.status}.`
+          );
+
+          return;
+        }
+
+        /*
+         * STEP 3
+         */
+        setLoadingMessage(
+          "Profile found. Loading your advertisements and orders..."
+        );
+
         const data = await response.json();
-console.log("PROFILE API DATA:", data);
+
+        console.log(
+          "PROFILE API DATA:",
+          data
+        );
+
+        if (cancelled) return;
+
+        if (
+          !data ||
+          !data.id ||
+          !data.stats
+        ) {
+          setDashboardError(
+            "The server returned incomplete advertiser information."
+          );
+
+          return;
+        }
+
+        /*
+         * STEP 4
+         * Store dashboard information.
+         */
         setAdvertiser({
           id: data.id || user.id,
-          businessName: data.businessName || "",
-          email: data.email || user.email || "",
-          phone: data.phone || "",
+          businessName:
+            data.businessName || "",
+          email:
+            data.email ||
+            user.email ||
+            "",
+          phone:
+            data.phone || "",
         });
 
-        setStats(data.stats || null);
-        setAds(data.ads || []);
-        setOrders(data.orders || []);
+        setStats(data.stats);
+
+        setAds(
+          Array.isArray(data.ads)
+            ? data.ads
+            : []
+        );
+
+        setOrders(
+          Array.isArray(data.orders)
+            ? data.orders
+            : []
+        );
+
+        console.log(
+          "DASHBOARD LOAD COMPLETE"
+        );
+
+        setLoadingMessage(
+          "Dashboard loaded."
+        );
       } catch (error) {
-        console.error("Dashboard error:", error);
+        console.error(
+          "DASHBOARD LOAD ERROR:",
+          error
+        );
+
+        if (cancelled) return;
+
+        if (
+          error instanceof DOMException &&
+          error.name === "AbortError"
+        ) {
+          setDashboardError(
+            "Safari took too long to connect to the advertiser profile server."
+          );
+        } else if (
+          error instanceof Error
+        ) {
+          setDashboardError(
+            `Dashboard error: ${error.message}`
+          );
+        } else {
+          setDashboardError(
+            "An unexpected error occurred while loading your dashboard."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadDashboard();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router, supabase]);
 
   async function handleLogout() {
@@ -135,28 +320,48 @@ console.log("PROFILE API DATA:", data);
     try {
       await supabase.auth.signOut();
 
-      router.replace("/login");
+      router.replace(
+        "/advertiser/login"
+      );
+
       router.refresh();
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error(
+        "Logout error:",
+        error
+      );
+
       setLoggingOut(false);
     }
   }
 
-  function formatCurrency(amount: number) {
+  function formatCurrency(
+    amount: number
+  ) {
     return `$${amount.toFixed(2)}`;
   }
 
-  function formatDate(date: string) {
-    return new Date(date).toLocaleDateString("en-ZW", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+  function formatDate(
+    date: string
+  ) {
+    return new Date(
+      date
+    ).toLocaleDateString(
+      "en-ZW",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }
+    );
   }
 
-  function statusClasses(status: string) {
-    switch (status.toLowerCase()) {
+  function statusClasses(
+    status: string
+  ) {
+    switch (
+      status.toLowerCase()
+    ) {
       case "active":
       case "paid":
       case "verified":
@@ -177,54 +382,95 @@ console.log("PROFILE API DATA:", data);
     }
   }
 
+  /*
+   * LOADING SCREEN
+   */
   if (loading) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-900">
         <div className="flex min-h-screen items-center justify-center px-6">
-          <div className="rounded-2xl border border-slate-200 bg-white px-8 py-10 text-center shadow-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white px-8 py-10 text-center shadow-sm">
+
             <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-900" />
 
             <h1 className="text-lg font-black text-blue-950">
               Loading your dashboard
             </h1>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Please wait...
+            <p className="mt-3 text-sm font-medium text-slate-600">
+              {loadingMessage}
             </p>
+
+            <p className="mt-5 text-xs text-slate-400">
+              Please wait while we connect your account.
+            </p>
+
           </div>
         </div>
       </main>
     );
   }
 
-  if (!advertiser || !stats) {
+  /*
+   * ERROR SCREEN
+   */
+  if (
+    !advertiser ||
+    !stats
+  ) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-        <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-black text-blue-950">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-2xl font-black text-red-600">
+            !
+          </div>
+
+          <h1 className="mt-5 text-xl font-black text-blue-950">
             Unable to load dashboard
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
-            We couldn't load your advertiser information.
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            {dashboardError ||
+              "We couldn't load your advertiser information."}
           </p>
 
-          <Link
-            href="/login"
-            className="mt-6 inline-block rounded-xl bg-blue-950 px-5 py-3 text-sm font-bold text-white"
-          >
-            Return to login
-          </Link>
+          <div className="mt-6 flex flex-col gap-3">
+
+            <button
+              type="button"
+              onClick={() =>
+                window.location.reload()
+              }
+              className="min-h-[48px] rounded-xl bg-blue-950 px-5 py-3 text-sm font-bold text-white active:scale-[0.98]"
+            >
+              Try Again
+            </button>
+
+            <Link
+              href="/advertiser/login"
+              className="flex min-h-[48px] items-center justify-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-bold text-slate-700"
+            >
+              Return to Login
+            </Link>
+
+          </div>
         </div>
       </main>
     );
   }
 
+  /*
+   * YOUR EXISTING DASHBOARD UI STARTS HERE.
+   */
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <ma className="min-h-screen bg-slate-50 text-slate-900">
+
       {/* Header */}
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+
           <div>
             <Link
               href="/"
@@ -234,7 +480,7 @@ console.log("PROFILE API DATA:", data);
             </Link>
 
             <p className="mt-1 text-sm text-slate-500">
-             Advertising Portal 
+              Advertising Portal
             </p>
           </div>
 
@@ -242,12 +488,16 @@ console.log("PROFILE API DATA:", data);
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-[44px] rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loggingOut ? "Logging out..." : "Logout"}
+            {loggingOut
+              ? "Logging out..."
+              : "Logout"}
           </button>
+
         </div>
       </header>
+
 
       <div className="mx-auto max-w-7xl px-6 py-10">
         {/* Welcome */}

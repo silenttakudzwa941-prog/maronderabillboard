@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -68,12 +67,10 @@ function CreateAdvertisementContent() {
   const packageId = searchParams.get("package") || "starter";
 
   const selectedPackage =
-    packages[packageId as keyof typeof packages] ||
-    packages.starter;
+    packages[packageId as keyof typeof packages] || packages.starter;
 
   const [businessName, setBusinessName] = useState("");
-  const [advertisementTitle, setAdvertisementTitle] =
-    useState("");
+  const [advertisementTitle, setAdvertisementTitle] = useState("");
   const [description, setDescription] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
 
@@ -83,16 +80,16 @@ function CreateAdvertisementContent() {
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
 
-  const [mediaFile, setMediaFile] =
-    useState<File | null>(null);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreviewUrl, setMediaPreviewUrl] = useState("");
 
-  const [mediaPreviewUrl, setMediaPreviewUrl] =
-    useState("");
+  const [socialPlatforms, setSocialPlatforms] = useState<string[]>([]);
 
-  const [socialPlatforms, setSocialPlatforms] =
-    useState<string[]>([]);
-
-  // MEDIA PREVIEW
+  /*
+   * ---------------------------------------------------------
+   * MEDIA PREVIEW
+   * ---------------------------------------------------------
+   */
   useEffect(() => {
     if (!mediaFile || advertisementType !== "image") {
       setMediaPreviewUrl("");
@@ -108,41 +105,54 @@ function CreateAdvertisementContent() {
     };
   }, [mediaFile, advertisementType]);
 
-  // SOCIAL MEDIA PRICING
-  const socialMediaTotal = socialPlatforms.reduce(
-    (total, platform) => {
-      return (
-        total +
-        (socialPlatformPricing[
-          platform as keyof typeof socialPlatformPricing
-        ] || 0)
-      );
-    },
-    0
-  );
+  /*
+   * ---------------------------------------------------------
+   * SOCIAL MEDIA TOTAL
+   * ---------------------------------------------------------
+   */
+  const socialMediaTotal = socialPlatforms.reduce((total, platform) => {
+    return (
+      total +
+      (socialPlatformPricing[
+        platform as keyof typeof socialPlatformPricing
+      ] || 0)
+    );
+  }, 0);
 
-  // TOTAL PRICE
+  /*
+   * ---------------------------------------------------------
+   * TOTAL PRICE
+   * ---------------------------------------------------------
+   */
   const totalPrice =
     selectedPackage.price +
     socialMediaTotal +
-    (socialPlatforms.length > 0
-      ? campaignManagementFee
-      : 0);
+    (socialPlatforms.length > 0 ? campaignManagementFee : 0);
 
-  // AUTOMATIC END DATE
+  /*
+   * ---------------------------------------------------------
+   * END DATE
+   * ---------------------------------------------------------
+   */
   const endDate = useMemo(() => {
     if (!startDate) return "";
 
-    const date = new Date(startDate);
+    const date = new Date(`${startDate}T00:00:00`);
 
-    date.setDate(
-      date.getDate() + selectedPackage.duration
-    );
+    date.setDate(date.getDate() + selectedPackage.duration);
 
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   }, [startDate, selectedPackage.duration]);
 
-  // FILE SELECTION
+  /*
+   * ---------------------------------------------------------
+   * FILE SELECTION
+   * ---------------------------------------------------------
+   */
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -154,18 +164,45 @@ function CreateAdvertisementContent() {
     setMediaFile(file);
   };
 
-  // CONTINUE TO PAYMENT
+  /*
+   * ---------------------------------------------------------
+   * CHANGE MEDIA TYPE
+   * ---------------------------------------------------------
+   */
+  const handleMediaTypeChange = (type: "image" | "video") => {
+    if (uploading) return;
+
+    setAdvertisementType(type);
+    setMediaFile(null);
+    setMediaPreviewUrl("");
+    setError("");
+  };
+
+  /*
+   * ---------------------------------------------------------
+   * SOCIAL PLATFORM
+   * ---------------------------------------------------------
+   */
+  const toggleSocialPlatform = (platformId: string) => {
+    if (uploading) return;
+
+    setSocialPlatforms((current) =>
+      current.includes(platformId)
+        ? current.filter((item) => item !== platformId)
+        : [...current, platformId]
+    );
+  };
+
+  /*
+   * ---------------------------------------------------------
+   * CONTINUE TO PAYMENT
+   * ---------------------------------------------------------
+   */
   const handleContinue = async () => {
-    /*
-     * IMPORTANT:
-     * Check mediaFile immediately and create a local
-     * non-null reference. This prevents TypeScript from
-     * treating the file as possibly null later.
-     */
+    if (uploading) return;
+
     if (!mediaFile) {
-      setError(
-        "Please select an advertisement image or video."
-      );
+      setError("Please select an advertisement image or video.");
       return;
     }
 
@@ -189,9 +226,9 @@ function CreateAdvertisementContent() {
       missingFields.push("WhatsApp Number");
     }
 
-   if (!location) {
-  missingFields.push("Advertising Area");
-}
+    if (!location) {
+      missingFields.push("Advertising Area");
+    }
 
     if (!startDate) {
       missingFields.push("Start Date");
@@ -211,44 +248,34 @@ function CreateAdvertisementContent() {
     setUploading(true);
 
     try {
-      // Prepare file for upload
       const formData = new FormData();
 
       formData.append("file", selectedMediaFile);
 
-      // Upload advertisement media
-      const response = await fetch(
-        "/api/advertisements/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch("/api/advertisements/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            "Failed to upload advertisement media."
+          data.error || "Failed to upload advertisement media."
         );
       }
 
-      // Prepare advertisement data
       const advertisementData = {
         packageId,
 
-        businessName:
-          businessName.trim(),
+        businessName: businessName.trim(),
 
-        advertisementTitle:
-          advertisementTitle.trim(),
+        advertisementTitle: advertisementTitle.trim(),
 
-        description:
-          description.trim(),
+        description: description.trim(),
 
-        whatsapp:
-          whatsapp.trim(),
+        whatsapp: whatsapp.trim(),
 
         advertisementType,
 
@@ -258,14 +285,11 @@ function CreateAdvertisementContent() {
 
         endDate,
 
-        mediaFileName:
-          selectedMediaFile.name,
+        mediaFileName: selectedMediaFile.name,
 
-        mediaUrl:
-          data.path,
+        mediaUrl: data.path,
 
-        mediaType:
-          data.mediaType,
+        mediaType: data.mediaType,
 
         socialPlatforms,
 
@@ -276,37 +300,58 @@ function CreateAdvertisementContent() {
             ? campaignManagementFee
             : 0,
 
-        billboardPrice:
-          selectedPackage.price,
+        billboardPrice: selectedPackage.price,
 
         totalPrice,
       };
 
-      // Save advertisement details
-      sessionStorage.setItem(
-        "marondera-billboard-advertisement",
-        JSON.stringify(advertisementData)
-      );
+      /*
+       * Safari can sometimes throw when storage is
+       * unavailable. Do not allow that to break navigation.
+       */
+      try {
+        sessionStorage.setItem(
+          "marondera-billboard-advertisement",
+          JSON.stringify(advertisementData)
+        );
+      } catch (storageError) {
+        console.error("Session storage error:", storageError);
+      }
 
-      // Go to payment page
-      router.push(
-        `/advertise/payment?package=${packageId}`
+      /*
+       * Use window.location.assign instead of relying only
+       * on client-side router navigation.
+       */
+      window.location.assign(
+        `/advertise/payment?package=${encodeURIComponent(packageId)}`
       );
     } catch (error) {
-      console.error(
-        "Advertisement upload error:",
-        error
-      );
+      console.error("Advertisement upload error:", error);
 
       setError(
         error instanceof Error
           ? error.message
           : "Failed to upload advertisement. Please try again."
       );
-    } finally {
+
       setUploading(false);
     }
   };
+
+  /*
+   * ---------------------------------------------------------
+   * TODAY
+   * ---------------------------------------------------------
+   */
+  const today = useMemo(() => {
+    const date = new Date();
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -315,7 +360,7 @@ function CreateAdvertisementContent() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link
             href="/"
-            className="flex items-center gap-3"
+            className="flex min-h-[44px] items-center gap-3 touch-manipulation"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 font-black text-white">
               MB
@@ -334,14 +379,14 @@ function CreateAdvertisementContent() {
 
           <Link
             href="/advertise"
-            className="text-sm font-bold text-slate-600 hover:text-blue-900"
+            className="flex min-h-[44px] items-center touch-manipulation text-sm font-bold text-slate-600"
           >
             ← Change Package
           </Link>
         </div>
       </header>
 
-      {/* PAGE INTRO */}
+      {/* INTRO */}
       <section className="px-6 pb-8 pt-14">
         <div className="mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-900">
@@ -353,9 +398,8 @@ function CreateAdvertisementContent() {
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-500">
-            Provide the details of your advertisement and
-            choose where and when you would like it
-            displayed.
+            Provide the details of your advertisement and choose where
+            and when you would like it displayed.
           </p>
         </div>
       </section>
@@ -399,12 +443,12 @@ function CreateAdvertisementContent() {
         </div>
       </section>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
       <section className="mx-auto max-w-7xl px-6 pb-24">
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           {/* FORM */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            {/* SELECTED PACKAGE */}
+            {/* PACKAGE */}
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -418,11 +462,8 @@ function CreateAdvertisementContent() {
 
                   <div className="mt-1 text-sm font-semibold text-slate-500">
                     {selectedPackage.duration} days ·{" "}
-                    {selectedPackage.advertisements}{" "}
-                    advertisement
-                    {selectedPackage.advertisements > 1
-                      ? "s"
-                      : ""}
+                    {selectedPackage.advertisements} advertisement
+                    {selectedPackage.advertisements > 1 ? "s" : ""}
                   </div>
                 </div>
 
@@ -452,12 +493,11 @@ function CreateAdvertisementContent() {
                     type="text"
                     value={businessName}
                     onChange={(event) =>
-                      setBusinessName(
-                        event.target.value
-                      )
+                      setBusinessName(event.target.value)
                     }
                     placeholder="e.g. Takudzwa Butchery"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+                    autoComplete="organization"
+                    className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
 
@@ -470,18 +510,18 @@ function CreateAdvertisementContent() {
                     type="tel"
                     value={whatsapp}
                     onChange={(event) =>
-                      setWhatsapp(
-                        event.target.value
-                      )
+                      setWhatsapp(event.target.value)
                     }
                     placeholder="e.g. 077 123 4567"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
               </div>
             </div>
 
-            {/* ADVERTISEMENT DETAILS */}
+            {/* AD DETAILS */}
             <div className="mt-10 border-t border-slate-200 pt-8">
               <h2 className="text-xl font-black text-blue-950">
                 Advertisement Details
@@ -501,12 +541,10 @@ function CreateAdvertisementContent() {
                     type="text"
                     value={advertisementTitle}
                     onChange={(event) =>
-                      setAdvertisementTitle(
-                        event.target.value
-                      )
+                      setAdvertisementTitle(event.target.value)
                     }
                     placeholder="e.g. Fresh Beef Available Today!"
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+                    className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
 
@@ -518,13 +556,11 @@ function CreateAdvertisementContent() {
                   <textarea
                     value={description}
                     onChange={(event) =>
-                      setDescription(
-                        event.target.value
-                      )
+                      setDescription(event.target.value)
                     }
                     rows={5}
                     placeholder="Describe your products, services, special offer or promotion..."
-                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   />
 
                   <div className="mt-2 text-right text-xs text-slate-400">
@@ -541,21 +577,19 @@ function CreateAdvertisementContent() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Upload the image or video you want customers to
-                see.
+                Upload the image or video you want customers to see.
               </p>
 
-              {/* TYPE */}
+              {/* TYPE BUTTONS */}
               <div className="mt-6 grid grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() =>
-                    setAdvertisementType("image")
-                  }
-                  className={`rounded-xl border-2 p-4 text-left transition ${
+                  disabled={uploading}
+                  onClick={() => handleMediaTypeChange("image")}
+                  className={`min-h-[100px] touch-manipulation rounded-xl border-2 p-4 text-left transition active:scale-[0.99] ${
                     advertisementType === "image"
                       ? "border-blue-900 bg-blue-50"
-                      : "border-slate-200 hover:border-slate-300"
+                      : "border-slate-200"
                   }`}
                 >
                   <div className="text-2xl">🖼️</div>
@@ -571,13 +605,12 @@ function CreateAdvertisementContent() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setAdvertisementType("video")
-                  }
-                  className={`rounded-xl border-2 p-4 text-left transition ${
+                  disabled={uploading}
+                  onClick={() => handleMediaTypeChange("video")}
+                  className={`min-h-[100px] touch-manipulation rounded-xl border-2 p-4 text-left transition active:scale-[0.99] ${
                     advertisementType === "video"
                       ? "border-blue-900 bg-blue-50"
-                      : "border-slate-200 hover:border-slate-300"
+                      : "border-slate-200"
                   }`}
                 >
                   <div className="text-2xl">🎥</div>
@@ -594,24 +627,28 @@ function CreateAdvertisementContent() {
 
               {/* UPLOAD */}
               <div className="mt-5">
-                <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center transition hover:border-blue-500 hover:bg-blue-50">
+                <label
+                  htmlFor="advertisement-media"
+                  className="flex min-h-[180px] cursor-pointer touch-manipulation flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center active:bg-blue-50"
+                >
                   <div className="text-4xl">
                     {advertisementType === "image"
                       ? "🖼️"
                       : "🎥"}
                   </div>
 
-                  <div className="mt-4 font-black text-blue-950">
+                  <div className="mt-4 break-all font-black text-blue-950">
                     {mediaFile
                       ? mediaFile.name
                       : `Upload your ${advertisementType}`}
                   </div>
 
                   <div className="mt-2 text-sm text-slate-500">
-                    Click to choose a file from your device
+                    Tap to choose a file from your device
                   </div>
 
                   <input
+                    id="advertisement-media"
                     type="file"
                     accept={
                       advertisementType === "image"
@@ -619,7 +656,8 @@ function CreateAdvertisementContent() {
                         : "video/*"
                     }
                     onChange={handleFileChange}
-                    className="hidden"
+                    disabled={uploading}
+                    className="sr-only"
                   />
                 </label>
               </div>
@@ -632,22 +670,22 @@ function CreateAdvertisementContent() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-             ZimDigitalBillboard is included with every
-advertising package. You can also choose
-additional social media platforms.
+                ZimDigitalBillboard is included with every advertising
+                package. You can also choose additional social media
+                platforms.
               </p>
 
-              {/* ZIMDIGITAL BILLBOARD */}
+              {/* BILLBOARD */}
               <div className="mt-6 rounded-2xl border-2 border-blue-900 bg-blue-50 p-5">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-900 text-xl">
+                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-900 text-xl">
                       🖥️
                     </div>
 
                     <div>
                       <div className="font-black text-blue-950">
-                        MaronderaBillboard
+                        ZimDigitalBillboards
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">
@@ -660,13 +698,13 @@ additional social media platforms.
                     </div>
                   </div>
 
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-900 text-white">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-900 text-white">
                     ✓
                   </div>
                 </div>
               </div>
 
-              {/* SOCIAL MEDIA PLATFORMS */}
+              {/* SOCIAL */}
               <div className="mt-6">
                 <div className="text-sm font-black text-blue-950">
                   Choose Additional Social Media Platforms
@@ -699,58 +737,40 @@ additional social media platforms.
                         "Promote your advertisement through WhatsApp.",
                     },
                   ].map((platform) => {
-                    const selected =
-                      socialPlatforms.includes(
-                        platform.id
-                      );
+                    const selected = socialPlatforms.includes(
+                      platform.id
+                    );
 
                     return (
                       <button
                         key={platform.id}
                         type="button"
-                        onClick={() => {
-                          setSocialPlatforms(
-                            (current) =>
-                              current.includes(
-                                platform.id
-                              )
-                                ? current.filter(
-                                    (item) =>
-                                      item !==
-                                      platform.id
-                                  )
-                                : [
-                                    ...current,
-                                    platform.id,
-                                  ]
-                          );
-                        }}
-                        className={`rounded-2xl border-2 p-5 text-left transition ${
+                        disabled={uploading}
+                        onClick={() =>
+                          toggleSocialPlatform(platform.id)
+                        }
+                        className={`min-h-[100px] touch-manipulation rounded-2xl border-2 p-5 text-left transition active:scale-[0.99] ${
                           selected
                             ? "border-blue-700 bg-blue-50 shadow-sm"
-                            : "border-slate-200 bg-white hover:border-slate-300"
+                            : "border-slate-200 bg-white"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-2xl">
-                              {platform.id ===
-                                "facebook" && (
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-2xl">
+                              {platform.id === "facebook" && (
                                 <FaFacebook className="text-[#1877F2]" />
                               )}
 
-                              {platform.id ===
-                                "instagram" && (
+                              {platform.id === "instagram" && (
                                 <FaInstagram className="text-[#E4405F]" />
                               )}
 
-                              {platform.id ===
-                                "tiktok" && (
+                              {platform.id === "tiktok" && (
                                 <FaTiktok className="text-black" />
                               )}
 
-                              {platform.id ===
-                                "whatsapp" && (
+                              {platform.id === "whatsapp" && (
                                 <FaWhatsapp className="text-[#25D366]" />
                               )}
                             </div>
@@ -785,7 +805,7 @@ additional social media platforms.
                   })}
                 </div>
 
-                {/* SELECTED PLATFORMS */}
+                {/* SELECTED */}
                 <div className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
                   <span className="font-bold text-slate-700">
                     Selected platforms:
@@ -794,16 +814,14 @@ additional social media platforms.
                     ? socialPlatforms
                         .map(
                           (platform) =>
-                            platform
-                              .charAt(0)
-                              .toUpperCase() +
+                            platform.charAt(0).toUpperCase() +
                             platform.slice(1)
                         )
                         .join(", ")
                     : "ZimDigitalBillboard only"}
                 </div>
 
-                {/* SOCIAL MEDIA COST */}
+                {/* COST */}
                 {socialPlatforms.length > 0 && (
                   <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
                     <div className="font-black text-blue-950">
@@ -811,58 +829,49 @@ additional social media platforms.
                     </div>
 
                     <div className="mt-4 space-y-3 text-sm">
-                      {socialPlatforms.map(
-                        (platform) => (
-                          <div
-                            key={platform}
-                            className="flex items-center justify-between"
-                          >
-                            <span className="flex items-center gap-2 text-slate-600">
-                              {platform ===
-                                "facebook" && (
-                                <>
-                                  <FaFacebook className="text-[#1877F2]" />
-                                  Facebook
-                                </>
-                              )}
+                      {socialPlatforms.map((platform) => (
+                        <div
+                          key={platform}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-2 text-slate-600">
+                            {platform === "facebook" && (
+                              <>
+                                <FaFacebook className="text-[#1877F2]" />
+                                Facebook
+                              </>
+                            )}
 
-                              {platform ===
-                                "instagram" && (
-                                <>
-                                  <FaInstagram className="text-[#E4405F]" />
-                                  Instagram
-                                </>
-                              )}
+                            {platform === "instagram" && (
+                              <>
+                                <FaInstagram className="text-[#E4405F]" />
+                                Instagram
+                              </>
+                            )}
 
-                              {platform ===
-                                "tiktok" && (
-                                <>
-                                  <FaTiktok className="text-black" />
-                                  TikTok
-                                </>
-                              )}
+                            {platform === "tiktok" && (
+                              <>
+                                <FaTiktok className="text-black" />
+                                TikTok
+                              </>
+                            )}
 
-                              {platform ===
-                                "whatsapp" && (
-                                <>
-                                  <FaWhatsapp className="text-[#25D366]" />
-                                  WhatsApp
-                                </>
-                              )}
-                            </span>
+                            {platform === "whatsapp" && (
+                              <>
+                                <FaWhatsapp className="text-[#25D366]" />
+                                WhatsApp
+                              </>
+                            )}
+                          </span>
 
-                            <span className="font-bold text-slate-800">
-                              $
-                              {
-                                socialPlatformPricing[
-                                  platform as keyof typeof socialPlatformPricing
-                                ]
-                              }
-                              .toFixed(2)
-                            </span>
-                          </div>
-                        )
-                      )}
+                          <span className="font-bold text-slate-800">
+                            $
+                            {socialPlatformPricing[
+                              platform as keyof typeof socialPlatformPricing
+                            ].toFixed(2)}
+                          </span>
+                        </div>
+                      ))}
 
                       <div className="flex items-center justify-between border-t border-slate-200 pt-3">
                         <span className="text-slate-600">
@@ -870,10 +879,7 @@ additional social media platforms.
                         </span>
 
                         <span className="font-bold text-slate-800">
-                          $
-                          {campaignManagementFee.toFixed(
-                            2
-                          )}
+                          ${campaignManagementFee.toFixed(2)}
                         </span>
                       </div>
 
@@ -896,14 +902,15 @@ additional social media platforms.
               </div>
             </div>
 
-            {/* LOCATION & DATES */}
+            {/* SCHEDULE */}
             <div className="mt-10 border-t border-slate-200 pt-8">
               <h2 className="text-xl font-black text-blue-950">
                 Advertising Schedule
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Choose the area where your advertisement should be displayed and when it should run.
+                Choose the area where your advertisement should be
+                displayed and when it should run.
               </p>
 
               <div className="mt-6 grid gap-5 md:grid-cols-3">
@@ -915,21 +922,14 @@ additional social media platforms.
                   <select
                     value={location}
                     onChange={(event) =>
-                      setLocation(
-                        event.target.value
-                      )
+                      setLocation(event.target.value)
                     }
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+                    className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   >
-                    <option value="">
-                      Select location
-                    </option>
+                    <option value="">Select location</option>
 
                     {locations.map((item) => (
-                      <option
-                        key={item}
-                        value={item}
-                      >
+                      <option key={item} value={item}>
                         {item}
                       </option>
                     ))}
@@ -945,16 +945,10 @@ additional social media platforms.
                     type="date"
                     value={startDate}
                     onChange={(event) =>
-                      setStartDate(
-                        event.target.value
-                      )
+                      setStartDate(event.target.value)
                     }
-                    min={
-                      new Date()
-                        .toISOString()
-                        .split("T")[0]
-                    }
-                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+                    min={today}
+                    className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
 
@@ -967,13 +961,12 @@ additional social media platforms.
                     type="date"
                     value={endDate}
                     readOnly
-                    className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-slate-500 outline-none"
+                    className="min-h-[48px] w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-base text-slate-500 outline-none"
                   />
 
                   {startDate && (
                     <div className="mt-2 text-xs font-semibold text-blue-700">
-                      Automatically calculated from your
-                      package.
+                      Automatically calculated from your package.
                     </div>
                   )}
                 </div>
@@ -992,7 +985,7 @@ additional social media platforms.
                 type="button"
                 onClick={handleContinue}
                 disabled={uploading || !mediaFile}
-                className="w-full rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
+                className="min-h-[54px] w-full touch-manipulation rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-blue-950 shadow-lg transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {uploading
                   ? "Uploading Advertisement..."
@@ -1000,8 +993,8 @@ additional social media platforms.
               </button>
 
               <p className="mt-3 text-center text-xs text-slate-400">
-                You will review your advertisement before
-                completing payment.
+                You will review your advertisement before completing
+                payment.
               </p>
             </div>
           </div>
@@ -1019,10 +1012,8 @@ additional social media platforms.
                 </div>
               </div>
 
-              {/* AD PREVIEW */}
               <div className="bg-slate-950 p-5">
                 <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
-                  {/* MEDIA PREVIEW */}
                   <div className="flex aspect-video items-center justify-center bg-slate-200">
                     {mediaFile &&
                     mediaPreviewUrl &&
@@ -1035,26 +1026,21 @@ additional social media platforms.
                     ) : (
                       <div className="text-center">
                         <div className="text-5xl">
-                          {advertisementType ===
-                          "image"
+                          {advertisementType === "image"
                             ? "🖼️"
                             : "🎥"}
                         </div>
 
                         <div className="mt-3 text-sm font-bold text-slate-500">
-                          Your{" "}
-                          {advertisementType} will
-                          appear here
+                          Your {advertisementType} will appear here
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* AD CONTENT */}
                   <div className="p-5">
                     <div className="text-xs font-bold uppercase tracking-wide text-blue-600">
-                      {businessName ||
-                        "Your Business"}
+                      {businessName || "Your Business"}
                     </div>
 
                     <div className="mt-2 text-xl font-black text-blue-950">
@@ -1090,9 +1076,7 @@ additional social media platforms.
 
                 <div className="mt-4 space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">
-                      Package
-                    </span>
+                    <span className="text-slate-500">Package</span>
 
                     <span className="font-bold text-slate-800">
                       {selectedPackage.name}
@@ -1100,87 +1084,67 @@ additional social media platforms.
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-slate-500">
-                      Duration
-                    </span>
+                    <span className="text-slate-500">Duration</span>
 
                     <span className="font-bold text-slate-800">
                       {selectedPackage.duration} days
                     </span>
                   </div>
 
-                  {/* SOCIAL MEDIA SUMMARY */}
                   {socialPlatforms.length > 0 && (
-                    <>
-                      <div className="border-t border-slate-200 pt-3">
-                        <div className="font-black text-blue-950">
-                          Social Media
-                        </div>
+                    <div className="border-t border-slate-200 pt-3">
+                      <div className="font-black text-blue-950">
+                        Social Media
+                      </div>
 
-                        <div className="mt-2 space-y-2">
-                          {socialPlatforms.map(
-                            (platform) => (
-                              <div
-                                key={platform}
-                                className="flex items-center justify-between"
-                              >
-                                <span className="flex items-center gap-2 text-slate-500">
-                                  {platform ===
-                                    "facebook" && (
-                                    <FaFacebook className="text-[#1877F2]" />
-                                  )}
+                      <div className="mt-2 space-y-2">
+                        {socialPlatforms.map((platform) => (
+                          <div
+                            key={platform}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="flex items-center gap-2 text-slate-500">
+                              {platform === "facebook" && (
+                                <FaFacebook className="text-[#1877F2]" />
+                              )}
 
-                                  {platform ===
-                                    "instagram" && (
-                                    <FaInstagram className="text-[#E4405F]" />
-                                  )}
+                              {platform === "instagram" && (
+                                <FaInstagram className="text-[#E4405F]" />
+                              )}
 
-                                  {platform ===
-                                    "tiktok" && (
-                                    <FaTiktok className="text-black" />
-                                  )}
+                              {platform === "tiktok" && (
+                                <FaTiktok className="text-black" />
+                              )}
 
-                                  {platform ===
-                                    "whatsapp" && (
-                                    <FaWhatsapp className="text-[#25D366]" />
-                                  )}
+                              {platform === "whatsapp" && (
+                                <FaWhatsapp className="text-[#25D366]" />
+                              )}
 
-                                  {platform
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                    platform.slice(
-                                      1
-                                    )}
-                                </span>
-
-                                <span className="font-bold text-slate-700">
-  $
-  {socialPlatformPricing[
-    platform as keyof typeof socialPlatformPricing
-  ].toFixed(2)}
-</span>
-                              </div>
-                            )
-                          )}
-
-                          <div className="flex justify-between text-slate-500">
-                            <span>
-                              Management
+                              {platform.charAt(0).toUpperCase() +
+                                platform.slice(1)}
                             </span>
 
-                            <span>
+                            <span className="font-bold text-slate-700">
                               $
-                              {campaignManagementFee.toFixed(
-                                2
-                              )}
+                              {socialPlatformPricing[
+                                platform as keyof typeof socialPlatformPricing
+                              ].toFixed(2)}
                             </span>
                           </div>
+                        ))}
+
+                        <div className="flex justify-between text-slate-500">
+                          <span>Management</span>
+
+                          <span>
+                            ${campaignManagementFee.toFixed(2)}
+                          </span>
                         </div>
                       </div>
-                    </>
+                    </div>
                   )}
 
-                  /* TOTAL */
+                  {/* TOTAL */}
                   <div className="flex justify-between border-t border-slate-200 pt-3">
                     <span className="font-black text-blue-950">
                       Total
@@ -1199,7 +1163,8 @@ additional social media platforms.
 
       {/* FOOTER */}
       <footer className="bg-slate-950 px-6 py-8 text-center text-sm text-slate-400">
-        © {new Date().getFullYear()} ZimDigitalBillboard. Silent Programs. All rights reserved.
+        © {new Date().getFullYear()} ZimDigitalBillboard. Silent
+        Programs. All rights reserved.
       </footer>
     </main>
   );
@@ -1207,9 +1172,16 @@ additional social media platforms.
 
 export default function CreateAdvertisement() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="text-sm font-bold text-slate-500">
+            Loading...
+          </div>
+        </div>
+      }
+    >
       <CreateAdvertisementContent />
     </Suspense>
   );
 }
-
