@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -15,20 +16,21 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleLogin(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    try {
-      setLoading(true);
-      setError("");
+    if (loading) return;
 
+    setLoading(true);
+    setError("");
+
+    try {
       const supabase = createClient();
 
+      // 1. Sign in with Supabase
       const { data, error: loginError } =
         await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         });
 
@@ -37,23 +39,27 @@ export default function AdminLoginPage() {
       }
 
       if (!data.user) {
-        throw new Error(
-          "Login failed. Please try again."
-        );
+        throw new Error("Login failed. Please try again.");
       }
 
-      const response = await fetch(
-        "/api/admin/check"
-      );
+      // 2. Check whether the logged-in user is an admin
+      const response = await fetch("/api/admin/check", {
+        method: "GET",
+        cache: "no-store",
+      });
 
-      if (!response.ok) {
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.authorized) {
         await supabase.auth.signOut();
 
         throw new Error(
-          "You are not authorized to access the admin panel."
+          result?.error ||
+            "You are not authorized to access the admin panel."
         );
       }
 
+      // 3. Admin verified — go to dashboard
       router.replace("/admin/dashboard");
       router.refresh();
     } catch (error) {
@@ -62,7 +68,7 @@ export default function AdminLoginPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Unable to sign in."
+          : "Unable to sign in. Please try again."
       );
     } finally {
       setLoading(false);
@@ -72,11 +78,10 @@ export default function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-10">
       <div className="w-full max-w-md">
-
         {/* Brand */}
         <div className="mb-8 text-center">
           <p className="text-sm font-bold text-blue-700">
-            MaronderaBillboard
+            Zim Digital Billboards
           </p>
 
           <h1 className="mt-2 text-3xl font-black text-blue-950">
@@ -90,11 +95,7 @@ export default function AdminLoginPage() {
 
         {/* Login Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
-          <form
-            onSubmit={handleLogin}
-            className="space-y-5"
-          >
-
+          <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
             <div>
               <label
@@ -108,13 +109,12 @@ export default function AdminLoginPage() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="admin@example.com"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
               />
             </div>
 
@@ -131,19 +131,21 @@ export default function AdminLoginPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                disabled={loading}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
               />
             </div>
 
             {/* Error */}
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+              <div
+                role="alert"
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3"
+              >
                 <p className="text-sm font-semibold text-red-700">
                   {error}
                 </p>
@@ -156,11 +158,8 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="w-full rounded-xl bg-blue-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading
-                ? "Signing in..."
-                : "Sign in to Admin"}
+              {loading ? "Signing in..." : "Sign in to Admin"}
             </button>
-
           </form>
         </div>
 
@@ -173,8 +172,9 @@ export default function AdminLoginPage() {
             ← Back to website
           </Link>
         </div>
-
       </div>
     </main>
   );
 }
+
+
