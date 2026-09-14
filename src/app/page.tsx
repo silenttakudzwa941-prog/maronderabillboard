@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   FaFacebookF,
   FaInstagram,
@@ -11,36 +11,26 @@ import {
   FaTwitter,
 } from "react-icons/fa";
 import { FaGlobe } from "react-icons/fa";
+import Link from "next/link";
 
-const mockAds = [
-  {
-    id: 1,
-    title: "Chicken Inn Marondera",
-    description: "Delicious meals and great deals available today.",
-    mediaType: "image",
-    mediaUrl: "https://via.placeholder.com/800x500",
-    category: "Food",
-    whatsapp: "263770000000",
-  },
-  {
-    id: 2,
-    title: "Toyota Corolla For Sale",
-    description: "Clean Toyota Corolla available for sale in Marondera.",
-    mediaType: "video",
-    mediaUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-    category: "Cars",
-    whatsapp: "263771111111",
-  },
-  {
-    id: 3,
-    title: "Fresh Farm Produce",
-    description: "Fresh vegetables and farm produce delivered locally.",
-    mediaType: "image",
-    mediaUrl: "https://via.placeholder.com/800x500",
-    category: "Agriculture",
-    whatsapp: "263772222222",
-  },
-];
+type Advertisement = {
+  id: string;
+  title: string;
+  mediaUrl: string;
+  mediaType: string;
+  duration: number | null;
+  category: string;
+  location: string | null;
+  status: string;
+  views: number;
+  isFeatured: boolean;
+  createdAt: string;
+  advertiser: {
+    businessName: string;
+    phone: string | null;
+    email: string | null;
+  };
+};
 
 const packages = [
   {
@@ -67,8 +57,28 @@ const packages = [
   },
 ];
 
+function getWhatsAppNumber(phone: string | null) {
+  if (!phone) return null;
+
+  let number = phone.replace(/\D/g, "");
+
+  // Zimbabwe local format: 0771234567 -> 263771234567
+  if (number.startsWith("0")) {
+    number = "263" + number.substring(1);
+  }
+
+  // Zimbabwe number without country code: 771234567 -> 263771234567
+  if (number.startsWith("7") && number.length === 9) {
+    number = "263" + number;
+  }
+
+  return number;
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [ads, setAds] = useState<Advertisement[]>([]);
+  const [adsLoading, setAdsLoading] = useState(true);
 
   const socialIcons: Record<string, ReactNode> = {
     Website: <FaGlobe className="text-slate-600" />,
@@ -80,19 +90,46 @@ export default function Home() {
     Twitter: <FaTwitter className="text-blue-500" />,
   };
 
+  useEffect(() => {
+    async function loadAds() {
+      try {
+        const response = await fetch("/api/advertisements", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load advertisements");
+        }
+
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setAds(data);
+        } else {
+          setAds([]);
+        }
+      } catch (error) {
+        console.error("Failed to load advertisements:", error);
+        setAds([]);
+      } finally {
+        setAdsLoading(false);
+      }
+    }
+
+    loadAds();
+  }, []);
+
   const closeMenu = () => {
     setMenuOpen(false);
   };
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-
       {/* NAVIGATION */}
       <header className="sticky top-0 z-[100] isolate border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between px-6 py-4">
-
           {/* LOGO */}
-          <a
+          <Link
             href="/"
             onClick={closeMenu}
             className="flex items-center gap-3 touch-manipulation"
@@ -110,16 +147,16 @@ export default function Home() {
                 Zimbabwe&apos;s Digital Advertising Platform
               </div>
             </div>
-          </a>
+          </Link>
 
           {/* DESKTOP NAVIGATION */}
           <nav className="hidden items-center gap-8 md:flex">
-            <a
+            <Link
               href="/"
               className="text-sm font-semibold text-blue-900"
             >
               Home
-            </a>
+            </Link>
 
             <a
               href="#advertisements"
@@ -190,14 +227,13 @@ export default function Home() {
         >
           <nav className="mx-auto max-w-7xl">
             <div className="flex flex-col gap-2">
-
-              <a
+              <Link
                 href="/"
                 onClick={closeMenu}
                 className="flex min-h-[48px] items-center rounded-xl px-4 py-3 font-semibold text-slate-900 touch-manipulation active:bg-slate-100"
               >
                 Home
-              </a>
+              </Link>
 
               <a
                 href="#advertisements"
@@ -240,7 +276,6 @@ export default function Home() {
               >
                 Get Started
               </a>
-
             </div>
           </nav>
         </div>
@@ -249,7 +284,6 @@ export default function Home() {
       {/* HERO */}
       <section className="relative overflow-hidden bg-blue-950">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-28">
-
           <div>
             <div className="mb-6 inline-flex items-center rounded-full border border-blue-800 bg-blue-900 px-4 py-2 text-sm font-semibold text-blue-100">
               📍 Advertising in Marondera
@@ -269,7 +303,6 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-
               <a
                 href="/advertise"
                 className="rounded-xl bg-yellow-400 px-7 py-4 text-center font-black text-blue-950 shadow-lg transition hover:bg-yellow-300"
@@ -283,7 +316,6 @@ export default function Home() {
               >
                 Browse Advertisements
               </a>
-
             </div>
 
             <div className="mt-8 flex flex-wrap gap-6 text-sm text-blue-200">
@@ -295,9 +327,7 @@ export default function Home() {
 
           <div className="relative">
             <div className="rounded-3xl border border-blue-800 bg-blue-900 p-4 shadow-2xl">
-
               <div className="rounded-2xl bg-white p-4">
-
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <div className="text-xs font-semibold text-slate-400">
@@ -343,18 +373,15 @@ export default function Home() {
                     WhatsApp
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
       {/* TRUST / STATS */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-slate-200 md:grid-cols-4">
-
           <div className="px-6 py-8 text-center">
             <div className="text-3xl font-black text-blue-900">
               100%
@@ -390,7 +417,6 @@ export default function Home() {
               Social Platforms
             </div>
           </div>
-
         </div>
       </section>
 
@@ -399,16 +425,14 @@ export default function Home() {
         id="advertisements"
         className="mx-auto max-w-7xl px-6 py-20"
       >
-
         <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-
           <div>
             <div className="text-sm font-black uppercase tracking-widest text-blue-700">
               Discover
             </div>
 
             <h2 className="mt-2 text-3xl font-black md:text-4xl">
-              🔥 Trending in Marondera
+              🔥 Trending in Harare
             </h2>
 
             <p className="mt-3 max-w-xl text-slate-500">
@@ -423,70 +447,144 @@ export default function Home() {
           >
             View All Ads →
           </a>
-
         </div>
 
-        <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+        {/* LOADING */}
+        {adsLoading && (
+          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+              >
+                <div className="h-56 animate-pulse bg-slate-200" />
 
-          {mockAds.map((ad) => (
-            <article
-              key={ad.id}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                <div className="p-5">
+                  <div className="h-6 w-3/4 animate-pulse rounded bg-slate-200" />
+
+                  <div className="mt-3 h-4 w-1/2 animate-pulse rounded bg-slate-200" />
+
+                  <div className="mt-5 h-12 animate-pulse rounded-xl bg-slate-200" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* NO ADS */}
+        {!adsLoading && ads.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+            <div className="text-5xl">📢</div>
+
+            <h3 className="mt-5 text-2xl font-black text-slate-900">
+              No advertisements are live yet
+            </h3>
+
+            <p className="mx-auto mt-3 max-w-xl text-slate-500">
+              Be one of the first businesses to advertise on Zim Digital
+              Billboards and reach customers in Marondera.
+            </p>
+
+            <a
+              href="/advertise"
+              className="mt-7 inline-block rounded-xl bg-blue-900 px-7 py-4 font-black text-white transition hover:bg-blue-800"
             >
+              Start Advertising →
+            </a>
+          </div>
+        )}
 
-              <div className="relative">
+        {/* REAL ADS */}
+        {!adsLoading && ads.length > 0 && (
+          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+            {ads.map((ad) => {
+              const whatsappNumber = getWhatsAppNumber(
+                ad.advertiser?.phone
+              );
 
-                {ad.mediaType === "video" ? (
-                  <video
-                    src={ad.mediaUrl}
-                    controls
-                    className="h-56 w-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src={ad.mediaUrl}
-                    alt={ad.title}
-                    className="h-56 w-full object-cover"
-                  />
-                )}
-
-                <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-black text-blue-900 shadow">
-                  {ad.category}
-                </span>
-
-              </div>
-
-              <div className="p-5">
-
-                <h3 className="text-xl font-black">
-                  {ad.title}
-                </h3>
-
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  {ad.description}
-                </p>
-
-                <a
-                  href={`https://wa.me/${ad.whatsapp}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 block rounded-xl bg-green-500 py-3 text-center font-bold text-white transition hover:bg-green-600"
+              return (
+                <article
+                  key={ad.id}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
                 >
-                  WhatsApp Seller
-                </a>
+                  <div className="relative">
+                    {ad.mediaType.toLowerCase() === "video" ? (
+                      <video
+                        src={ad.mediaUrl}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="h-56 w-full bg-black object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={ad.mediaUrl}
+                        alt={ad.title}
+                        loading="lazy"
+                        className="h-56 w-full object-cover"
+                      />
+                    )}
 
-              </div>
+                    <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-black text-blue-900 shadow">
+                      {ad.category}
+                    </span>
 
-            </article>
-          ))}
+                    {ad.isFeatured && (
+                      <span className="absolute right-4 top-4 rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-blue-950 shadow">
+                        FEATURED
+                      </span>
+                    )}
+                  </div>
 
-        </div>
+                  <div className="p-5">
+                    <h3 className="text-xl font-black">
+                      {ad.title}
+                    </h3>
+
+                    <div className="mt-2 space-y-1 text-sm text-slate-500">
+                      <p>
+                        <span className="font-semibold text-slate-700">
+                          Business:
+                        </span>{" "}
+                        {ad.advertiser?.businessName || "Advertiser"}
+                      </p>
+
+                      {ad.location && (
+                        <p>
+                          <span className="font-semibold text-slate-700">
+                            Location:
+                          </span>{" "}
+                          {ad.location}
+                        </p>
+                      )}
+                    </div>
+
+                    {whatsappNumber ? (
+                      <a
+                        href={`https://wa.me/${whatsappNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-green-500 py-3 text-center font-bold text-white transition hover:bg-green-600"
+                      >
+                        <FaWhatsapp className="text-lg" />
+                        WhatsApp Seller
+                      </a>
+                    ) : (
+                      <div className="mt-5 rounded-xl bg-slate-100 py-3 text-center font-bold text-slate-500">
+                        Contact Advertiser
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* WHY ADVERTISE */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-6">
-
           <div className="mx-auto max-w-2xl text-center">
             <div className="text-sm font-black uppercase tracking-widest text-blue-700">
               Why Zim Digital Billboards?
@@ -503,7 +601,6 @@ export default function Home() {
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-
             {[
               {
                 icon: "📍",
@@ -543,7 +640,6 @@ export default function Home() {
                 </p>
               </div>
             ))}
-
           </div>
         </div>
       </section>
@@ -553,9 +649,7 @@ export default function Home() {
         id="how-it-works"
         className="bg-slate-50 py-20"
       >
-
         <div className="mx-auto max-w-7xl px-6">
-
           <div className="text-center">
             <div className="text-sm font-black uppercase tracking-widest text-blue-700">
               Simple Process
@@ -567,7 +661,6 @@ export default function Home() {
           </div>
 
           <div className="mt-14 grid gap-8 md:grid-cols-4">
-
             {[
               {
                 number: "01",
@@ -594,7 +687,6 @@ export default function Home() {
                 key={step.number}
                 className="relative text-center"
               >
-
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-900 text-xl font-black text-white">
                   {step.number}
                 </div>
@@ -606,10 +698,8 @@ export default function Home() {
                 <p className="mt-3 text-sm leading-6 text-slate-500">
                   {step.text}
                 </p>
-
               </div>
             ))}
-
           </div>
         </div>
       </section>
@@ -619,11 +709,8 @@ export default function Home() {
         id="pricing"
         className="bg-white py-20"
       >
-
         <div className="mx-auto max-w-7xl px-6">
-
           <div className="mx-auto max-w-2xl text-center">
-
             <div className="text-sm font-black uppercase tracking-widest text-blue-700">
               Advertising Packages
             </div>
@@ -636,11 +723,9 @@ export default function Home() {
               Affordable packages designed for individuals, small businesses
               and growing brands.
             </p>
-
           </div>
 
           <div className="mt-12 grid gap-7 md:grid-cols-3">
-
             {packages.map((pkg) => (
               <div
                 key={pkg.name}
@@ -650,7 +735,6 @@ export default function Home() {
                     : "border-slate-200 shadow-sm"
                 }`}
               >
-
                 {pkg.popular && (
                   <div className="absolute right-5 top-5 rounded-full bg-yellow-400 px-3 py-1 text-xs font-black text-blue-950">
                     MOST POPULAR
@@ -670,7 +754,6 @@ export default function Home() {
                 </div>
 
                 <div className="mt-6 border-t border-slate-200 pt-6">
-
                   <div className="font-bold">
                     ✓ {pkg.ads}
                   </div>
@@ -678,7 +761,6 @@ export default function Home() {
                   <p className="mt-3 text-sm leading-6 text-slate-500">
                     {pkg.description}
                   </p>
-
                 </div>
 
                 <a
@@ -691,21 +773,16 @@ export default function Home() {
                 >
                   Choose Package
                 </a>
-
               </div>
             ))}
-
           </div>
         </div>
       </section>
 
       {/* SOCIAL MEDIA */}
       <section className="bg-blue-950 py-20">
-
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 md:grid-cols-2">
-
           <div>
-
             <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">
               One Advertisement.
               <span className="block text-yellow-400">
@@ -719,7 +796,6 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-
               <span className="flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-slate-900">
                 <FaFacebookF className="text-blue-600" />
                 Facebook
@@ -749,14 +825,11 @@ export default function Home() {
                 <FaTwitter className="text-blue-500" />
                 Twitter
               </span>
-
             </div>
           </div>
 
           <div className="rounded-3xl border border-blue-800 bg-blue-900 p-8">
-
             <div className="rounded-2xl bg-white p-7">
-
               <div className="text-sm font-bold text-slate-400">
                 YOUR CAMPAIGN
               </div>
@@ -766,7 +839,6 @@ export default function Home() {
               </div>
 
               <div className="mt-6 space-y-3">
-
                 {[
                   "Website",
                   "Facebook",
@@ -793,21 +865,15 @@ export default function Home() {
                     </span>
                   </div>
                 ))}
-
               </div>
-
             </div>
-
           </div>
-
         </div>
       </section>
 
       {/* FINAL CTA */}
       <section className="bg-yellow-400 py-20">
-
         <div className="mx-auto max-w-4xl px-6 text-center">
-
           <div className="text-4xl">
             🚀
           </div>
@@ -827,19 +893,14 @@ export default function Home() {
           >
             Advertise on Zim Digital Billboards →
           </a>
-
         </div>
-
       </section>
 
       {/* FOOTER */}
       <footer className="bg-slate-950 text-white">
-
         <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-4">
-
           {/* Brand */}
           <div className="md:col-span-2">
-
             <h2 className="text-2xl font-black text-white">
               Zim Digital Billboards
             </h2>
@@ -851,13 +912,11 @@ export default function Home() {
 
             {/* Follow Us */}
             <div className="mt-6">
-
               <h3 className="font-black text-white">
                 Follow Us
               </h3>
 
               <div className="mt-4 flex flex-wrap gap-3">
-
                 <a
                   href="https://wa.me/263718299260"
                   target="_blank"
@@ -907,20 +966,17 @@ export default function Home() {
                 >
                   <FaYoutube className="text-lg" />
                 </a>
-
               </div>
             </div>
           </div>
 
           {/* Platform */}
           <div>
-
             <h3 className="font-black text-white">
               Platform
             </h3>
 
             <div className="mt-4 space-y-3 text-sm text-slate-400">
-
               <a
                 href="#advertisements"
                 className="block transition hover:text-white"
@@ -948,19 +1004,16 @@ export default function Home() {
               >
                 Advertise
               </a>
-
             </div>
           </div>
 
           {/* Contact */}
           <div>
-
             <h3 className="font-black text-white">
               Contact
             </h3>
 
             <div className="mt-4 space-y-4 text-sm text-slate-400">
-
               <div>
                 📍 Marondera, Zimbabwe
               </div>
@@ -985,22 +1038,18 @@ export default function Home() {
               >
                 ✉️ zimdigitalbillboards941@gmail.com
               </a>
-
             </div>
           </div>
-
         </div>
 
         {/* Bottom Bar */}
         <div className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
-
           <p>
             © {new Date().getFullYear()} Zim Digital Billboards. All rights
             reserved.
           </p>
 
           <div className="mt-3 flex flex-wrap justify-center gap-4">
-
             <a
               href="/privacy"
               className="transition hover:text-white"
@@ -1014,7 +1063,6 @@ export default function Home() {
             >
               Terms &amp; Conditions
             </a>
-
           </div>
 
           <p className="mt-2">
@@ -1028,10 +1076,8 @@ export default function Home() {
               Silent Programs
             </a>
           </p>
-
         </div>
       </footer>
-
     </main>
   );
 }
