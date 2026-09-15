@@ -482,7 +482,7 @@ export default function Home() {
 
             <p className="mx-auto mt-3 max-w-xl text-slate-500">
               Be one of the first businesses to advertise on Zim Digital
-              Billboards and reach customers in Marondera.
+              Billboards and reach customers around the World.
             </p>
 
             <a
