@@ -286,20 +286,20 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-28">
           <div>
             <div className="mb-6 inline-flex items-center rounded-full border border-blue-800 bg-blue-900 px-4 py-2 text-sm font-semibold text-blue-100">
-              📍 Advertising in Marondera
+              📍 Advertising in Harare
             </div>
 
             <h1 className="text-4xl font-black leading-tight text-white md:text-6xl">
               Put Your Business
               <span className="block text-yellow-400">
-                In Front of Marondera
+                In Front of Zimbabwe
               </span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-8 text-blue-100">
               Advertise your products, services, special offers and events
               through one simple platform built for businesses and customers
-              in Marondera.
+              in Zimbabwe.
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -605,7 +605,7 @@ export default function Home() {
               {
                 icon: "📍",
                 title: "Reach Local Customers",
-                text: "Put your business in front of people looking for products and services around Marondera.",
+                text: "Put your business in front of people looking for products and services around Zimbabwe.",
               },
               {
                 icon: "🎥",
@@ -884,7 +884,7 @@ export default function Home() {
 
           <p className="mx-auto mt-5 max-w-2xl text-lg text-blue-900">
             Start advertising your products, services or special offers to
-            customers in Marondera today.
+            customers in Zimbabwe today.
           </p>
 
           <a
