@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
     if (authError || !user) {
       return NextResponse.json(
         {
-          error: "You must be logged in to upload an advertisement.",
+          error:
+            "You must be logged in to upload an advertisement.",
         },
         { status: 401 }
       );
@@ -61,7 +63,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
+    const maxSize = isImage
+      ? MAX_IMAGE_SIZE
+      : MAX_VIDEO_SIZE;
 
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -77,21 +81,25 @@ export async function POST(request: Request) {
     const serviceRoleKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!serviceRoleKey) {
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!serviceRoleKey || !supabaseUrl) {
       console.error(
-        "SUPABASE_SERVICE_ROLE_KEY is not configured."
+        "Supabase storage environment variables are missing."
       );
 
       return NextResponse.json(
         {
-          error: "Server storage configuration is missing.",
+          error:
+            "Server storage configuration is missing.",
         },
         { status: 500 }
       );
     }
 
     const storageClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseUrl,
       serviceRoleKey
     );
 
@@ -112,6 +120,9 @@ export async function POST(request: Request) {
       await file.arrayBuffer()
     );
 
+    /*
+     * Upload the file.
+     */
     const { error: uploadError } =
       await storageClient.storage
         .from("advertisements")
@@ -128,25 +139,79 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          error: "Failed to upload advertisement media.",
+          error:
+            "Failed to upload advertisement media.",
         },
         { status: 500 }
       );
     }
 
-   const {
-  data: { publicUrl },
-} = storageClient.storage
-  .from("advertisements")
-  .getPublicUrl(filePath);
+    /*
+     * Verify that the object actually exists.
+     */
+    const folder = user.id;
 
-return NextResponse.json({
-  success: true,
-  path: filePath,
-  publicUrl,
-  fileName: file.name,
-  mediaType: isImage ? "image" : "video",
-});
+    const {
+      data: files,
+      error: listError,
+    } = await storageClient.storage
+      .from("advertisements")
+      .list(folder, {
+        search: fileName,
+        limit: 10,
+      });
+
+    if (listError) {
+      console.error(
+        "Supabase storage verification error:",
+        listError
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "The advertisement uploaded but could not be verified in storage.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const uploadedFileExists = files?.some(
+      (storedFile) => storedFile.name === fileName
+    );
+
+    if (!uploadedFileExists) {
+      console.error(
+        "Upload returned success, but the object was not found:",
+        filePath
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "The advertisement upload could not be verified. Please try again.",
+        },
+        { status: 500 }
+      );
+    }
+
+    /*
+     * Generate the public URL only after
+     * confirming that the object exists.
+     */
+    const {
+      data: { publicUrl },
+    } = storageClient.storage
+      .from("advertisements")
+      .getPublicUrl(filePath);
+
+    return NextResponse.json({
+      success: true,
+      path: filePath,
+      publicUrl,
+      fileName: file.name,
+      mediaType: isImage ? "image" : "video",
+    });
   } catch (error) {
     console.error(
       "Advertisement upload error:",
@@ -155,9 +220,11 @@ return NextResponse.json({
 
     return NextResponse.json(
       {
-        error: "Failed to upload advertisement media.",
+        error:
+          "Failed to upload advertisement media.",
       },
       { status: 500 }
     );
   }
 }
+
