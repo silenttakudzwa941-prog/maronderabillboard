@@ -779,35 +779,43 @@ export default function AdvertiserDashboard() {
                       className="border-b border-slate-100 last:border-0"
                     >
                     <td className="px-4 py-4">
-  <div className="flex items-center gap-4">
-    <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-      {ad.mediaType.toLowerCase().includes("video") ? (
-        <video
-          src={ad.mediaUrl}
-          controls
-          playsInline
-          preload="metadata"
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <img
-          src={ad.mediaUrl}
-          alt={ad.title}
-          className="h-full w-full object-cover"
-        />
-      )}
-    </div>
-
-    <div className="min-w-0">
-      <div className="font-bold text-slate-900">
-        {ad.title}
-      </div>
-
-      <div className="mt-1 text-xs text-slate-500">
-        {ad.mediaType}
-      </div>
-    </div>
-  </div>
+  <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+  {ad.mediaType?.toLowerCase().includes("video") ? (
+    <video
+      src={ad.mediaUrl}
+      controls
+      playsInline
+      preload="metadata"
+      className="h-full w-full object-cover"
+      onError={(event) => {
+        console.error(
+          "Advertisement video failed to load:",
+          ad.mediaUrl,
+          event
+        );
+      }}
+    />
+  ) : (
+    <img
+      src={ad.mediaUrl}
+      alt={ad.title}
+      className="h-full w-full object-cover"
+      onError={(event) => {
+        console.error(
+          "Advertisement image failed to load:",
+          ad.mediaUrl,
+          event
+        );
+      }}
+      onLoad={() => {
+        console.log(
+          "Advertisement image loaded:",
+          ad.mediaUrl
+        );
+      }}
+    />
+  )}
+</div>
 </td>
 
                       <td className="px-4 py-4 text-sm text-slate-600">
