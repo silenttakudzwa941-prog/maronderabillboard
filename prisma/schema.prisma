@@ -17,14 +17,16 @@ model Advertiser {
   orders Order[]
 }
 
+
 model Ad {
   id           String   @id
   title        String
   mediaUrl     String
   mediaType    String
   duration     Int?
-  category     String
-  location     String?
+  category     String   @default("Other")
+  subcategory  String   @default("Other Listings")
+  location     String
   status       String   @default("pending")
   views        Int      @default(0)
   isFeatured   Boolean  @default(false)
@@ -33,6 +35,8 @@ model Ad {
 
   advertiser Advertiser @relation(fields: [advertiserId], references: [id])
 }
+
+
 
 model Order {
   id           String @id @default(cuid())

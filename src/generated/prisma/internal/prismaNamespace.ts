@@ -848,6 +848,7 @@ export const AdScalarFieldEnum = {
   mediaType: 'mediaType',
   duration: 'duration',
   category: 'category',
+  subcategory: 'subcategory',
   location: 'location',
   status: 'status',
   views: 'views',

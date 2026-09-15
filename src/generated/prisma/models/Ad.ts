@@ -43,6 +43,7 @@ export type AdMinAggregateOutputType = {
   mediaType: string | null
   duration: number | null
   category: string | null
+  subcategory: string | null
   location: string | null
   status: string | null
   views: number | null
@@ -58,6 +59,7 @@ export type AdMaxAggregateOutputType = {
   mediaType: string | null
   duration: number | null
   category: string | null
+  subcategory: string | null
   location: string | null
   status: string | null
   views: number | null
@@ -73,6 +75,7 @@ export type AdCountAggregateOutputType = {
   mediaType: number
   duration: number
   category: number
+  subcategory: number
   location: number
   status: number
   views: number
@@ -100,6 +103,7 @@ export type AdMinAggregateInputType = {
   mediaType?: true
   duration?: true
   category?: true
+  subcategory?: true
   location?: true
   status?: true
   views?: true
@@ -115,6 +119,7 @@ export type AdMaxAggregateInputType = {
   mediaType?: true
   duration?: true
   category?: true
+  subcategory?: true
   location?: true
   status?: true
   views?: true
@@ -130,6 +135,7 @@ export type AdCountAggregateInputType = {
   mediaType?: true
   duration?: true
   category?: true
+  subcategory?: true
   location?: true
   status?: true
   views?: true
@@ -232,6 +238,7 @@ export type AdGroupByOutputType = {
   mediaType: string
   duration: number | null
   category: string
+  subcategory: string
   location: string
   status: string
   views: number
@@ -270,6 +277,7 @@ export type AdWhereInput = {
   mediaType?: Prisma.StringFilter<"Ad"> | string
   duration?: Prisma.IntNullableFilter<"Ad"> | number | null
   category?: Prisma.StringFilter<"Ad"> | string
+  subcategory?: Prisma.StringFilter<"Ad"> | string
   location?: Prisma.StringFilter<"Ad"> | string
   status?: Prisma.StringFilter<"Ad"> | string
   views?: Prisma.IntFilter<"Ad"> | number
@@ -286,6 +294,7 @@ export type AdOrderByWithRelationInput = {
   mediaType?: Prisma.SortOrder
   duration?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
+  subcategory?: Prisma.SortOrder
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   views?: Prisma.SortOrder
@@ -305,6 +314,7 @@ export type AdWhereUniqueInput = Prisma.AtLeast<{
   mediaType?: Prisma.StringFilter<"Ad"> | string
   duration?: Prisma.IntNullableFilter<"Ad"> | number | null
   category?: Prisma.StringFilter<"Ad"> | string
+  subcategory?: Prisma.StringFilter<"Ad"> | string
   location?: Prisma.StringFilter<"Ad"> | string
   status?: Prisma.StringFilter<"Ad"> | string
   views?: Prisma.IntFilter<"Ad"> | number
@@ -321,6 +331,7 @@ export type AdOrderByWithAggregationInput = {
   mediaType?: Prisma.SortOrder
   duration?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
+  subcategory?: Prisma.SortOrder
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   views?: Prisma.SortOrder
@@ -344,6 +355,7 @@ export type AdScalarWhereWithAggregatesInput = {
   mediaType?: Prisma.StringWithAggregatesFilter<"Ad"> | string
   duration?: Prisma.IntNullableWithAggregatesFilter<"Ad"> | number | null
   category?: Prisma.StringWithAggregatesFilter<"Ad"> | string
+  subcategory?: Prisma.StringWithAggregatesFilter<"Ad"> | string
   location?: Prisma.StringWithAggregatesFilter<"Ad"> | string
   status?: Prisma.StringWithAggregatesFilter<"Ad"> | string
   views?: Prisma.IntWithAggregatesFilter<"Ad"> | number
@@ -358,7 +370,8 @@ export type AdCreateInput = {
   mediaUrl: string
   mediaType: string
   duration?: number | null
-  category: string
+  category?: string
+  subcategory?: string
   location: string
   status?: string
   views?: number
@@ -373,7 +386,8 @@ export type AdUncheckedCreateInput = {
   mediaUrl: string
   mediaType: string
   duration?: number | null
-  category: string
+  category?: string
+  subcategory?: string
   location: string
   status?: string
   views?: number
@@ -389,6 +403,7 @@ export type AdUpdateInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -404,6 +419,7 @@ export type AdUncheckedUpdateInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -418,7 +434,8 @@ export type AdCreateManyInput = {
   mediaUrl: string
   mediaType: string
   duration?: number | null
-  category: string
+  category?: string
+  subcategory?: string
   location: string
   status?: string
   views?: number
@@ -434,6 +451,7 @@ export type AdUpdateManyMutationInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -448,6 +466,7 @@ export type AdUncheckedUpdateManyInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -473,6 +492,7 @@ export type AdCountOrderByAggregateInput = {
   mediaType?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  subcategory?: Prisma.SortOrder
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   views?: Prisma.SortOrder
@@ -493,6 +513,7 @@ export type AdMaxOrderByAggregateInput = {
   mediaType?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  subcategory?: Prisma.SortOrder
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   views?: Prisma.SortOrder
@@ -508,6 +529,7 @@ export type AdMinOrderByAggregateInput = {
   mediaType?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  subcategory?: Prisma.SortOrder
   location?: Prisma.SortOrder
   status?: Prisma.SortOrder
   views?: Prisma.SortOrder
@@ -589,7 +611,8 @@ export type AdCreateWithoutAdvertiserInput = {
   mediaUrl: string
   mediaType: string
   duration?: number | null
-  category: string
+  category?: string
+  subcategory?: string
   location: string
   status?: string
   views?: number
@@ -603,7 +626,8 @@ export type AdUncheckedCreateWithoutAdvertiserInput = {
   mediaUrl: string
   mediaType: string
   duration?: number | null
-  category: string
+  category?: string
+  subcategory?: string
   location: string
   status?: string
   views?: number
@@ -647,6 +671,7 @@ export type AdScalarWhereInput = {
   mediaType?: Prisma.StringFilter<"Ad"> | string
   duration?: Prisma.IntNullableFilter<"Ad"> | number | null
   category?: Prisma.StringFilter<"Ad"> | string
+  subcategory?: Prisma.StringFilter<"Ad"> | string
   location?: Prisma.StringFilter<"Ad"> | string
   status?: Prisma.StringFilter<"Ad"> | string
   views?: Prisma.IntFilter<"Ad"> | number
@@ -661,7 +686,8 @@ export type AdCreateManyAdvertiserInput = {
   mediaUrl: string
   mediaType: string
   duration?: number | null
-  category: string
+  category?: string
+  subcategory?: string
   location: string
   status?: string
   views?: number
@@ -676,6 +702,7 @@ export type AdUpdateWithoutAdvertiserInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -690,6 +717,7 @@ export type AdUncheckedUpdateWithoutAdvertiserInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -704,6 +732,7 @@ export type AdUncheckedUpdateManyWithoutAdvertiserInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category?: Prisma.StringFieldUpdateOperationsInput | string
+  subcategory?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   views?: Prisma.IntFieldUpdateOperationsInput | number
@@ -720,6 +749,7 @@ export type AdSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
   mediaType?: boolean
   duration?: boolean
   category?: boolean
+  subcategory?: boolean
   location?: boolean
   status?: boolean
   views?: boolean
@@ -736,6 +766,7 @@ export type AdSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions
   mediaType?: boolean
   duration?: boolean
   category?: boolean
+  subcategory?: boolean
   location?: boolean
   status?: boolean
   views?: boolean
@@ -752,6 +783,7 @@ export type AdSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions
   mediaType?: boolean
   duration?: boolean
   category?: boolean
+  subcategory?: boolean
   location?: boolean
   status?: boolean
   views?: boolean
@@ -768,6 +800,7 @@ export type AdSelectScalar = {
   mediaType?: boolean
   duration?: boolean
   category?: boolean
+  subcategory?: boolean
   location?: boolean
   status?: boolean
   views?: boolean
@@ -776,7 +809,7 @@ export type AdSelectScalar = {
   createdAt?: boolean
 }
 
-export type AdOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "mediaUrl" | "mediaType" | "duration" | "category" | "location" | "status" | "views" | "isFeatured" | "advertiserId" | "createdAt", ExtArgs["result"]["ad"]>
+export type AdOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "mediaUrl" | "mediaType" | "duration" | "category" | "subcategory" | "location" | "status" | "views" | "isFeatured" | "advertiserId" | "createdAt", ExtArgs["result"]["ad"]>
 export type AdInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   advertiser?: boolean | Prisma.AdvertiserDefaultArgs<ExtArgs>
 }
@@ -799,6 +832,7 @@ export type $AdPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     mediaType: string
     duration: number | null
     category: string
+    subcategory: string
     location: string
     status: string
     views: number
@@ -1235,6 +1269,7 @@ export interface AdFieldRefs {
   readonly mediaType: Prisma.FieldRef<"Ad", 'String'>
   readonly duration: Prisma.FieldRef<"Ad", 'Int'>
   readonly category: Prisma.FieldRef<"Ad", 'String'>
+  readonly subcategory: Prisma.FieldRef<"Ad", 'String'>
   readonly location: Prisma.FieldRef<"Ad", 'String'>
   readonly status: Prisma.FieldRef<"Ad", 'String'>
   readonly views: Prisma.FieldRef<"Ad", 'Int'>

@@ -1,4 +1,4 @@
-console.log("🔥🔥🔥 PRISMA FILE LOADED 🔥🔥🔥");
+
 
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -24,6 +24,3 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
-console.log("🔥 PRISMA DEBUG");
-console.log("Prisma instance:", prisma);
-console.log("Admin delegate:", prisma.admin);

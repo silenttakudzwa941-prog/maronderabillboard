@@ -20,6 +20,7 @@ type Advertisement = {
   mediaType: string;
   duration: number | null;
   category: string;
+   subcategory: string;
   location: string | null;
   status: string;
   views: number;
@@ -76,9 +77,122 @@ function getWhatsAppNumber(phone: string | null) {
 }
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [adsLoading, setAdsLoading] = useState(true);
+ const [menuOpen, setMenuOpen] = useState(false);
+
+const [ads, setAds] = useState<Advertisement[]>([]);
+const [adsLoading, setAdsLoading] = useState(true);
+const [featuredAd, setFeaturedAd] = useState<Advertisement | null>(null);
+const [featuredIndex, setFeaturedIndex] = useState(0);
+
+const [searchTerm, setSearchTerm] = useState("");
+const [selectedCategory, setSelectedCategory] = useState("");
+const [selectedSubcategory, setSelectedSubcategory] = useState("");
+const [selectedLocation, setSelectedLocation] = useState("");
+
+const categories = {
+  "Cars & Vehicles": [
+    "Cars",
+    "Trucks",
+    "Buses",
+    "Motorcycles",
+    "Car Parts & Accessories",
+    "Vehicle Services",
+  ],
+  Property: [
+    "Houses for Sale",
+    "Houses to Rent",
+    "Stands & Land",
+    "Commercial Property",
+    "Offices & Shops",
+    "Lodges & Guest Houses",
+  ],
+  "Furniture & Home": [
+    "Furniture",
+    "Appliances",
+    "Home Decor",
+    "Kitchen",
+    "Garden & Outdoor",
+  ],
+  "Jobs & Careers": [
+    "Jobs",
+    "Job Seekers",
+    "Recruitment",
+    "Training & Courses",
+  ],
+  "Business & Services": [
+    "General Services",
+    "Construction",
+    "Plumbing",
+    "Electrical",
+    "Cleaning",
+    "Transport & Logistics",
+    "Professional Services",
+    "Repairs & Maintenance",
+  ],
+  Electronics: [
+    "Phones",
+    "Computers & Laptops",
+    "TVs & Audio",
+    "Cameras",
+    "Accessories",
+  ],
+  "Fashion & Beauty": [
+    "Clothing",
+    "Shoes",
+    "Bags & Accessories",
+    "Hair & Beauty",
+    "Cosmetics",
+  ],
+  "Food & Restaurants": [
+    "Restaurants",
+    "Takeaways",
+    "Catering",
+    "Groceries",
+    "Bakeries",
+  ],
+  Agriculture: [
+    "Livestock",
+    "Poultry",
+    "Farming Equipment",
+    "Seeds & Fertilizer",
+    "Agricultural Products",
+  ],
+  "Health & Medical": [
+    "Clinics",
+    "Pharmacies",
+    "Medical Services",
+    "Fitness & Wellness",
+  ],
+  Education: [
+    "Schools",
+    "Colleges",
+    "Tutors",
+    "Training",
+  ],
+  "Shopping & Retail": [
+    "Hardware",
+    "Building Materials",
+    "Supermarkets",
+    "Wholesale",
+    "General Retail",
+  ],
+  "Events & Entertainment": [
+    "Events",
+    "Wedding Services",
+    "Photography",
+    "Entertainment",
+    "Venues",
+  ],
+  Other: [
+    "Other Listings",
+  ],
+} as const;
+
+const availableSubcategories = selectedCategory
+  ? categories[
+      selectedCategory as keyof typeof categories
+    ]
+  : [];
 
   const socialIcons: Record<string, ReactNode> = {
     Website: <FaGlobe className="text-slate-600" />,
@@ -105,6 +219,7 @@ export default function Home() {
 
         if (Array.isArray(data)) {
           setAds(data);
+   
         } else {
           setAds([]);
         }
@@ -118,10 +233,71 @@ export default function Home() {
 
     loadAds();
   }, []);
+useEffect(() => {
+  const activeAds = ads.filter((ad) => ad.status === "active");
 
+  if (activeAds.length <= 1) {
+    return;
+  }
+
+  const interval = setInterval(() => {
+    setFeaturedIndex((current) => (current + 1) % activeAds.length);
+  }, 8000);
+
+  return () => clearInterval(interval);
+}, [ads]);
+useEffect(() => {
+  const activeAds = ads.filter((ad) => ad.status === "active");
+
+  if (activeAds.length === 0) {
+    setFeaturedAd(null);
+    return;
+  }
+
+  setFeaturedAd(activeAds[featuredIndex % activeAds.length]);
+}, [ads, featuredIndex]);
   const closeMenu = () => {
     setMenuOpen(false);
   };
+  const filteredAds = ads.filter((ad) => {
+  const search = searchTerm.trim().toLowerCase();
+
+  const matchesSearch =
+    !search ||
+    ad.title.toLowerCase().includes(search) ||
+    ad.category.toLowerCase().includes(search) ||
+    ad.subcategory.toLowerCase().includes(search) ||
+    ad.location?.toLowerCase().includes(search) ||
+    ad.advertiser?.businessName
+      ?.toLowerCase()
+      .includes(search);
+
+  const matchesCategory =
+    !selectedCategory ||
+    ad.category === selectedCategory;
+
+  const matchesSubcategory =
+    !selectedSubcategory ||
+    ad.subcategory === selectedSubcategory;
+
+  const matchesLocation =
+    !selectedLocation ||
+    ad.location === selectedLocation;
+
+  return (
+    matchesSearch &&
+    matchesCategory &&
+    matchesSubcategory &&
+    matchesLocation
+  );
+});
+
+const clearFilters = () => {
+  setSearchTerm("");
+  setSelectedCategory("");
+  setSelectedSubcategory("");
+  setSelectedLocation("");
+};
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -281,103 +457,238 @@ export default function Home() {
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-blue-950">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-28">
-          <div>
-            <div className="mb-6 inline-flex items-center rounded-full border border-blue-800 bg-blue-900 px-4 py-2 text-sm font-semibold text-blue-100">
-              📍 Advertising in Harare
-            </div>
+     {/* HERO */}
+<section
+  className="relative overflow-hidden bg-slate-950 text-white"
+  style={{
+    backgroundImage: "url('/hero.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+>
+  {/* Background glow */}
+  <div className="pointer-events-none absolute inset-0">
+    <div className="absolute -left-32 top-20 h-80 w-80 rounded-full bg-blue-600/20 blur-3xl" />
+    <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-orange-500/15 blur-3xl" />
+    <div className="absolute bottom-0 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-500/10 blur-3xl" />
+  </div>
 
-            <h1 className="text-4xl font-black leading-tight text-white md:text-6xl">
-              Put Your Business
-              <span className="block text-yellow-400">
-                In Front of Zimbabwe
-              </span>
-            </h1>
+  {/* Subtle grid */}
+  <div
+    className="pointer-events-none absolute inset-0 opacity-20"
+    style={{
+      backgroundImage:
+        "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
+      backgroundSize: "48px 48px",
+    }}
+  />
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-blue-100">
-              Advertise your products, services, special offers and events
-              through one simple platform built for businesses and customers
-              in Zimbabwe.
+  <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-6 md:py-24 lg:px-8">
+    <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+      
+      {/* LEFT */}
+      <div>
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-slate-200 backdrop-blur">
+          <div className="mb-2">
+  <img
+    src="/flag.jpg"
+    alt="Zimbabwe flag"
+    className="h-6 w-auto"
+  />
+</div>
+          Digital advertising built for Zimbabwe
+        </div>
+
+        <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+          Reach More Customers Across{" "}
+          <span className="text-orange-400">Zimbabwe</span>
+        </h1>
+
+        <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+          Launch digital billboard advertisements for your business in minutes.
+          Promote products, services, properties, jobs, events and more — all
+          from one simple platform.
+        </p>
+
+        {/* Feature badges */}
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+            <div className="mb-2">
+  <img
+    src="/flag.jpg"
+    alt="Zimbabwe flag"
+    className="h-6 w-auto"
+  />
+</div>
+            <p className="mt-2 text-sm font-black">
+              Built for Zimbabwean Businesses
             </p>
-
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="/advertise"
-                className="rounded-xl bg-yellow-400 px-7 py-4 text-center font-black text-blue-950 shadow-lg transition hover:bg-yellow-300"
-              >
-                Start Advertising →
-              </a>
-
-              <a
-                href="#advertisements"
-                className="rounded-xl border border-blue-700 bg-blue-900 px-7 py-4 text-center font-bold text-white transition hover:bg-blue-800"
-              >
-                Browse Advertisements
-              </a>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-6 text-sm text-blue-200">
-              <span>✓ Local audience</span>
-              <span>✓ Image &amp; video ads</span>
-              <span>✓ Simple payment</span>
-            </div>
           </div>
 
-          <div className="relative">
-            <div className="rounded-3xl border border-blue-800 bg-blue-900 p-4 shadow-2xl">
-              <div className="rounded-2xl bg-white p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-semibold text-slate-400">
-                      FEATURED AD
-                    </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+            <div className="text-xl">📊</div>
+            <p className="mt-2 text-sm font-black">
+              Campaign Performance Tracking
+            </p>
+          </div>
 
-                    <div className="font-black text-blue-900">
-                      Zim Digital Billboards
-                    </div>
-                  </div>
-
-                  <div className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
-                    LIVE
-                  </div>
-                </div>
-
-                <div className="flex h-64 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-300 via-orange-400 to-blue-700 text-center">
-                  <div className="px-8">
-                    <div className="text-5xl">📢</div>
-
-                    <div className="mt-4 text-2xl font-black text-white">
-                      YOUR AD HERE
-                    </div>
-
-                    <div className="mt-2 text-sm font-semibold text-white/90">
-                      Reach customers across Zimbabwe
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-bold">
-                      Advertise Your Business
-                    </div>
-
-                    <div className="text-sm text-slate-500">
-                      Get noticed locally
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-green-500 px-4 py-2 text-sm font-bold text-white">
-                    WhatsApp
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+            <div className="text-xl">⚡</div>
+            <p className="mt-2 text-sm font-black">
+              Launch Your Ad in Minutes
+            </p>
           </div>
         </div>
-      </section>
+
+        {/* Payment / trust line */}
+        <div className="mt-6 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-300">
+          <span>🇿🇼</span>
+          <span>Proudly supporting businesses across Zimbabwe</span>
+          <span className="hidden text-slate-600 sm:inline">•</span>
+          <span>USD pricing</span>
+          <span className="hidden text-slate-600 sm:inline">•</span>
+          <span>EcoCash, bank & cash payments</span>
+        </div>
+
+        {/* CTA buttons */}
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/advertise"
+            className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-7 py-4 text-sm font-black text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-400"
+          >
+            Start Your Campaign
+            <span className="ml-2">→</span>
+          </Link>
+
+          <a
+            href="#how-it-works"
+            className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-7 py-4 text-sm font-black text-white transition hover:bg-white/10"
+          >
+            ▶ See How It Works
+          </a>
+        </div>
+      </div>
+
+      {/* RIGHT — DIGITAL BILLBOARD PREVIEW */}
+      <div className="relative mx-auto w-full max-w-xl">
+        {/* Glow */}
+        <div className="absolute inset-10 rounded-[3rem] bg-orange-500/20 blur-3xl" />
+
+        {/* Billboard frame */}
+        <div className="relative rounded-[2rem] border border-white/10 bg-slate-800/90 p-3 shadow-2xl shadow-black/60 backdrop-blur-sm">
+          <div className="pointer-events-none absolute -inset-3 -z-10 rounded-[2.5rem] bg-orange-500/10 blur-2xl" />
+          {/* Top bar */}
+          <div className="flex items-center justify-between rounded-t-[1.5rem] border-b border-white/10 bg-slate-900 px-5 py-3">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 animate-pulse rounded-full bg-green-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]" />
+              <span className="text-xs font-black uppercase tracking-wider text-white">
+                Live
+              </span>
+            </div>
+
+            <span className="text-xs font-semibold text-slate-400">
+              Zim Digital Billboard
+            </span>
+          </div>
+
+          {/* Screen */}
+          <div className="relative overflow-hidden rounded-b-[1.5rem] bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-300">
+            
+            {/* Decorative circles */}
+            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/10" />
+            <div className="absolute -bottom-20 -left-10 h-52 w-52 rounded-full bg-black/10" />
+
+   
+   <div className="relative min-h-[330px] overflow-hidden sm:min-h-[380px]">
+    <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+  {featuredAd ? (
+    <div
+      key={featuredAd.id}
+      className="absolute inset-0 animate-[fadeIn_0.7s_ease-in-out]"
+    >
+      {/* AD MEDIA */}
+      {featuredAd.mediaType === "video" ? (
+        <video
+          src={featuredAd.mediaUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <img
+          src={featuredAd.mediaUrl}
+          alt={featuredAd.title}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/20" />
+
+      {/* Advertisement information */}
+      <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black via-black/70 to-transparent p-6 pt-20 text-left">
+        {/* LIVE BADGE */}
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white backdrop-blur-md">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.9)]" />
+          Live Advertisement
+        </div>
+
+        {/* TITLE */}
+        <h2 className="text-2xl font-black leading-tight text-white sm:text-3xl">
+          {featuredAd.title}
+        </h2>
+
+        {/* BUSINESS NAME */}
+        <p className="mt-1 text-sm font-bold text-white/90">
+          {featuredAd.advertiser?.businessName}
+        </p>
+
+        {/* LOCATION */}
+        {featuredAd.location && (
+          <p className="mt-1 text-xs font-medium text-white/70">
+            📍 {featuredAd.location}
+          </p>
+        )}
+      </div>
+
+      {/* ROTATION PROGRESS BAR */}
+      <div className="absolute bottom-0 left-0 z-30 h-1 w-full overflow-hidden bg-black/30">
+        <div className="h-full w-full origin-left animate-[billboardProgress_8s_linear]" />
+      </div>
+    </div>
+  ) : (
+    /* FALLBACK WHEN THERE ARE NO ACTIVE ADS */
+    <div className="relative flex min-h-[330px] flex-col items-center justify-center px-8 py-12 text-center sm:min-h-[380px]">
+      <div className="mb-5 text-6xl sm:text-7xl">📣</div>
+
+      <h2 className="text-4xl font-black tracking-tight text-white drop-shadow sm:text-5xl">
+        YOUR AD HERE
+      </h2>
+
+      <p className="mt-4 max-w-sm text-sm font-bold text-white/90 sm:text-base">
+        Showcase your business, products or services to customers across
+        Zimbabwe.
+      </p>
+
+      <div className="mt-8 rounded-xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg">
+        💬 Advertise With ZimDigitalBillboard
+      </div>
+    </div>
+  )}
+</div>
+          </div>
+        </div>
+
+        {/* Bottom caption */}
+        <div className="mt-5 text-center text-sm font-semibold text-slate-400">
+          Simple advertising. Powerful reach. Built for Zimbabwe.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* TRUST / STATS */}
       <section className="border-b border-slate-200 bg-white">
@@ -431,14 +742,159 @@ export default function Home() {
               Discover
             </div>
 
-            <h2 className="mt-2 text-3xl font-black md:text-4xl">
-              🔥 Trending in Harare
-            </h2>
+           <h2 className="mt-2 text-3xl font-black md:text-4xl">
+  🔥 Discover Advertisements
+</h2>
 
             <p className="mt-3 max-w-xl text-slate-500">
-              Discover businesses, products, services and special offers
-              currently being promoted on Zim Digital Billboards.
+              Discover businesses, products, services and special offers from across Zimbabwe.
             </p>
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+    {/* SEARCH */}
+    <div className="lg:col-span-2">
+      <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+        Search
+      </label>
+
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(event) =>
+          setSearchTerm(event.target.value)
+        }
+        placeholder="Search cars, houses, jobs, businesses..."
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+      />
+    </div>
+
+    {/* CATEGORY */}
+    <div>
+      <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+        Category
+      </label>
+
+      <select
+        value={selectedCategory}
+        onChange={(event) => {
+          setSelectedCategory(event.target.value);
+          setSelectedSubcategory("");
+        }}
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+      >
+        <option value="">All Categories</option>
+
+        {Object.keys(categories).map((category) => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* LOCATION */}
+    <div>
+      <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+        Location
+      </label>
+
+      <select
+        value={selectedLocation}
+        onChange={(event) =>
+          setSelectedLocation(event.target.value)
+        }
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+      >
+        <option value="">All Zimbabwe</option>
+
+        {[
+          "Harare",
+          "Bulawayo",
+          "Chitungwiza",
+          "Mutare",
+          "Gweru",
+          "Masvingo",
+          "Marondera",
+          "Kwekwe",
+          "Kadoma",
+          "Chinhoyi",
+          "Victoria Falls",
+          "Bindura",
+          "Other",
+        ].map((location) => (
+          <option key={location} value={location}>
+            {location}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* SUBCATEGORY */}
+    <div>
+      <label className="mb-2 block text-xs font-black uppercase tracking-wide text-slate-500">
+        Subcategory
+      </label>
+
+      <select
+        value={selectedSubcategory}
+        onChange={(event) =>
+          setSelectedSubcategory(event.target.value)
+        }
+        disabled={!selectedCategory}
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <option value="">
+          {selectedCategory
+            ? "All Subcategories"
+            : "Select category first"}
+        </option>
+
+        {availableSubcategories.map((subcategory) => (
+          <option
+            key={subcategory}
+            value={subcategory}
+          >
+            {subcategory}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* CLEAR */}
+    <div className="flex items-end">
+      <button
+        type="button"
+        onClick={clearFilters}
+        className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-200"
+      >
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+    <p className="text-sm font-semibold text-slate-500">
+      Showing{" "}
+      <span className="font-black text-slate-900">
+        {filteredAds.length}
+      </span>{" "}
+      {filteredAds.length === 1 ? "advertisement" : "advertisements"}
+    </p>
+
+    {(searchTerm ||
+      selectedCategory ||
+      selectedSubcategory ||
+      selectedLocation) && (
+      <button
+        type="button"
+        onClick={clearFilters}
+        className="text-sm font-black text-blue-700 hover:text-blue-900"
+      >
+        Reset search
+      </button>
+    )}
+  </div>
+</div>
           </div>
 
           <a
@@ -493,11 +949,31 @@ export default function Home() {
             </a>
           </div>
         )}
+{!adsLoading && ads.length > 0 && filteredAds.length === 0 && (
+  <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+    <div className="text-5xl">🔎</div>
 
+    <h3 className="mt-5 text-2xl font-black text-slate-900">
+      No advertisements found
+    </h3>
+
+    <p className="mx-auto mt-3 max-w-xl text-slate-500">
+      Try a different search term, category, subcategory or location.
+    </p>
+
+    <button
+      type="button"
+      onClick={clearFilters}
+      className="mt-7 rounded-xl bg-blue-900 px-7 py-4 font-black text-white transition hover:bg-blue-800"
+    >
+      Clear Filters
+    </button>
+  </div>
+)}
         {/* REAL ADS */}
-        {!adsLoading && ads.length > 0 && (
-          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-            {ads.map((ad) => {
+        {!adsLoading && filteredAds.length > 0 && (
+  <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+    {filteredAds.map((ad) => {
               const whatsappNumber = getWhatsAppNumber(
                 ad.advertiser?.phone
               );

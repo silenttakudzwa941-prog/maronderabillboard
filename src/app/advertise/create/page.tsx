@@ -47,6 +47,117 @@ const locations = [
   "Bindura",
   "Other",
 ];
+const categories = {
+  "Cars & Vehicles": [
+    "Cars",
+    "Trucks",
+    "Buses",
+    "Motorcycles",
+    "Car Parts & Accessories",
+    "Vehicle Services",
+  ],
+
+  Property: [
+    "Houses for Sale",
+    "Houses to Rent",
+    "Stands & Land",
+    "Commercial Property",
+    "Offices & Shops",
+    "Lodges & Guest Houses",
+  ],
+
+  "Furniture & Home": [
+    "Furniture",
+    "Appliances",
+    "Home Decor",
+    "Kitchen",
+    "Garden & Outdoor",
+  ],
+
+  "Jobs & Careers": [
+    "Jobs",
+    "Job Seekers",
+    "Recruitment",
+    "Training & Courses",
+  ],
+
+  "Business & Services": [
+    "General Services",
+    "Construction",
+    "Plumbing",
+    "Electrical",
+    "Cleaning",
+    "Transport & Logistics",
+    "Professional Services",
+    "Repairs & Maintenance",
+  ],
+
+  Electronics: [
+    "Phones",
+    "Computers & Laptops",
+    "TVs & Audio",
+    "Cameras",
+    "Accessories",
+  ],
+
+  "Fashion & Beauty": [
+    "Clothing",
+    "Shoes",
+    "Bags & Accessories",
+    "Hair & Beauty",
+    "Cosmetics",
+  ],
+
+  "Food & Restaurants": [
+    "Restaurants",
+    "Takeaways",
+    "Catering",
+    "Groceries",
+    "Bakeries",
+  ],
+
+  Agriculture: [
+    "Livestock",
+    "Poultry",
+    "Farming Equipment",
+    "Seeds & Fertilizer",
+    "Agricultural Products",
+  ],
+
+  "Health & Medical": [
+    "Clinics",
+    "Pharmacies",
+    "Medical Services",
+    "Fitness & Wellness",
+  ],
+
+  Education: [
+    "Schools",
+    "Colleges",
+    "Tutors",
+    "Training",
+  ],
+
+  "Shopping & Retail": [
+    "Hardware",
+    "Building Materials",
+    "Supermarkets",
+    "Wholesale",
+    "General Retail",
+  ],
+
+  "Events & Entertainment": [
+    "Events",
+    "Wedding Services",
+    "Photography",
+    "Entertainment",
+    "Venues",
+  ],
+
+  Other: [
+    "Other Listings",
+  ],
+} as const;
 
 const socialPlatformPricing = {
   facebook: 10,
@@ -77,8 +188,11 @@ function CreateAdvertisementContent() {
   const [advertisementType, setAdvertisementType] =
     useState<"image" | "video">("image");
 
-  const [location, setLocation] = useState("");
-  const [startDate, setStartDate] = useState("");
+ const [category, setCategory] = useState("");
+const [subcategory, setSubcategory] = useState("");
+
+const [location, setLocation] = useState("");
+const [startDate, setStartDate] = useState("");
 
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreviewUrl, setMediaPreviewUrl] = useState("");
@@ -147,6 +261,9 @@ function CreateAdvertisementContent() {
 
     return `${year}-${month}-${day}`;
   }, [startDate, selectedPackage.duration]);
+  const availableSubcategories = category
+  ? categories[category as keyof typeof categories]
+  : [];
 
   /*
    * ---------------------------------------------------------
@@ -225,7 +342,13 @@ function CreateAdvertisementContent() {
     if (!whatsapp.trim()) {
       missingFields.push("WhatsApp Number");
     }
+if (!category) {
+  missingFields.push("Advertisement Category");
+}
 
+if (!subcategory) {
+  missingFields.push("Advertisement Subcategory");
+}
     if (!location) {
       missingFields.push("Advertising Area");
     }
@@ -266,10 +389,14 @@ function CreateAdvertisementContent() {
         );
       }
 
-      const advertisementData = {
-        packageId,
+    const advertisementData = {
+  packageId,
 
-        businessName: businessName.trim(),
+  businessName: businessName.trim(),
+
+  category,
+
+  subcategory,
 
         advertisementTitle: advertisementTitle.trim(),
 
@@ -530,7 +657,61 @@ function CreateAdvertisementContent() {
               <p className="mt-1 text-sm text-slate-500">
                 Create the message customers will see.
               </p>
+<div className="grid gap-5 md:grid-cols-2">
+  {/* CATEGORY */}
+  <div>
+    <label className="mb-2 block text-sm font-bold text-slate-700">
+      Advertisement Category *
+    </label>
 
+    <select
+      value={category}
+      onChange={(event) => {
+        setCategory(event.target.value);
+        setSubcategory("");
+      }}
+      className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100"
+    >
+      <option value="">Select category</option>
+
+      {Object.keys(categories).map((item) => (
+        <option key={item} value={item}>
+          {item}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* SUBCATEGORY */}
+  <div>
+   <label className="mb-2 block text-sm font-bold text-slate-700">
+  Subcategory *
+</label>
+
+    <select
+      value={subcategory}
+      onChange={(event) =>
+        setSubcategory(event.target.value)
+      }
+      disabled={!category}
+      className="min-h-[48px] w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base outline-none focus:border-blue-700 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+    >
+      <option value="">
+  {category
+    ? "Select subcategory"
+    : "Select category first"}
+</option>
+
+      {availableSubcategories.map((item) => (
+        <option key={item} value={item}>
+          {item}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+
+<div className="mt-5"></div>
               <div className="mt-6 grid gap-5">
                 <div>
                   <label className="mb-2 block text-sm font-bold text-slate-700">

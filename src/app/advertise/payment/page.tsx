@@ -39,24 +39,7 @@ const socialPlatformPricing = {
   whatsapp: 5,
 };
 
-type AdvertisementData = {
-  packageId: string;
-  businessName: string;
-  advertisementTitle: string;
-  description: string;
-  whatsapp: string;
-  advertisementType: "image" | "video";
-  location: string;
-  startDate: string;
-  endDate: string;
-  mediaFileName: string | null;
-  mediaUrl: string;
-  mediaType: "image" | "video";
-  socialPlatforms?: string[];
-  socialMediaTotal?: number;
-  campaignManagementFee?: number;
-  totalPrice?: number;
-};
+type AdvertisementData ={ packageId: string; businessName: string; advertisementTitle: string; description: string; whatsapp: string; advertisementType: "image" | "video"; category: string; subcategory: string; location: string; startDate: string; endDate: string; mediaFileName: string | null; mediaUrl: string; mediaType: "image" | "video"; socialPlatforms?: string[]; socialMediaTotal?: number; campaignManagementFee?: number; totalPrice?: number; };
 
 function AdvertisementPaymentContent() {
   const searchParams = useSearchParams();
@@ -199,11 +182,16 @@ function AdvertisementPaymentContent() {
             advertisement.whatsapp,
 
           advertisementType:
-            advertisement.advertisementType,
+  advertisement.advertisementType,
 
-          location:
-            advertisement.location,
+category:
+  advertisement.category,
 
+subcategory:
+  advertisement.subcategory,
+
+location:
+  advertisement.location,
           startDate:
             advertisement.startDate,
 

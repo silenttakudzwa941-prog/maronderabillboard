@@ -85,28 +85,34 @@ const advertiser = await prisma.advertiser.upsert({
 
     const body = await request.json();
 
-    const {
-      packageId,
+  const { 
+  packageId, 
 
-      businessName,
-      advertisementTitle,
-      description,
-      whatsapp,
+  businessName, 
+  advertisementTitle, 
+  description, 
+  whatsapp, 
 
-      advertisementType,
-      location,
-      startDate,
-      endDate,
+  advertisementType, 
+  category,
+  subcategory,
+  location, 
+  startDate, 
+  endDate, 
 
-      mediaUrl,
-      mediaType,
+  mediaUrl, 
+  mediaType, 
 
-      socialPlatforms,
+  socialPlatforms, 
 
-      paymentMethod,
-      paymentReference,
-    } = body;
-
+  paymentMethod, 
+  paymentReference, 
+} = body;
+console.log("🔥 ORDER CATEGORY DEBUG");
+console.log("category:", category);
+console.log("subcategory:", subcategory);
+console.log("location:", location);
+console.log("title:", advertisementTitle);
     // --------------------------------------------------
     // 3. VALIDATE PACKAGE
     // --------------------------------------------------
@@ -152,7 +158,29 @@ const advertiser = await prisma.advertiser.upsert({
         { status: 400 }
       );
     }
+if (
+  typeof category !== "string" ||
+  !category.trim()
+) {
+  return NextResponse.json(
+    {
+      error: "Advertisement category is required.",
+    },
+    { status: 400 }
+  );
+}
 
+if (
+  typeof subcategory !== "string" ||
+  !subcategory.trim()
+) {
+  return NextResponse.json(
+    {
+      error: "Advertisement subcategory is required.",
+    },
+    { status: 400 }
+  );
+}
     if (
       typeof mediaUrl !== "string" ||
       !mediaUrl.trim()
@@ -304,34 +332,37 @@ const advertiser = await prisma.advertiser.upsert({
           },
         });
 
-        const ad = await tx.ad.create({
-          data: {
-            id: crypto.randomUUID(),
+       const ad = await tx.ad.create({
+  data: {
+    id: crypto.randomUUID(),
 
-            title:
-              advertisementTitle.trim(),
+    title:
+      advertisementTitle.trim(),
 
-            mediaUrl:
-              mediaUrl.trim(),
+    mediaUrl:
+      mediaUrl.trim(),
 
-            mediaType,
+    mediaType,
 
-            duration:
-              selectedPackage.duration,
+    duration:
+      selectedPackage.duration,
 
-            category: "General",
+    category:
+      category.trim(),
 
-location:
-  typeof location === "string" && location.trim()
-    ? location.trim()
-    : "Marondera CBD",
+    subcategory:
+      subcategory.trim(),
 
-            status: "pending",
+    location:
+      typeof location === "string" && location.trim()
+        ? location.trim()
+        : "Marondera CBD",
 
-            advertiserId: advertiser.id,
-          },
-        });
+    status: "pending",
 
+    advertiserId: advertiser.id,
+  },
+});
         return {
           order,
           ad,
@@ -401,12 +432,14 @@ location:
   duration:
     result.ad.duration,
 
-  category:
-    result.ad.category,
+category:
+  result.ad.category,
 
-  location:
-    result.ad.location,
+subcategory:
+  result.ad.subcategory,
 
+location:
+  result.ad.location,
   status:
     result.ad.status,
 },
