@@ -778,15 +778,37 @@ export default function AdvertiserDashboard() {
                       key={ad.id}
                       className="border-b border-slate-100 last:border-0"
                     >
-                      <td className="px-4 py-4">
-                        <div className="font-bold text-slate-900">
-                          {ad.title}
-                        </div>
+                    <td className="px-4 py-4">
+  <div className="flex items-center gap-4">
+    <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+      {ad.mediaType.toLowerCase().includes("video") ? (
+        <video
+          src={ad.mediaUrl}
+          controls
+          playsInline
+          preload="metadata"
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <img
+          src={ad.mediaUrl}
+          alt={ad.title}
+          className="h-full w-full object-cover"
+        />
+      )}
+    </div>
 
-                        <div className="mt-1 text-xs text-slate-500">
-                          {ad.mediaType}
-                        </div>
-                      </td>
+    <div className="min-w-0">
+      <div className="font-bold text-slate-900">
+        {ad.title}
+      </div>
+
+      <div className="mt-1 text-xs text-slate-500">
+        {ad.mediaType}
+      </div>
+    </div>
+  </div>
+</td>
 
                       <td className="px-4 py-4 text-sm text-slate-600">
                         {ad.category}
