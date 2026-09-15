@@ -1,12 +1,9 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
-
     const ads = await prisma.ad.findMany({
       where: {
         status: "active",
@@ -26,14 +23,10 @@ export async function GET() {
     });
 
     const adsWithUrls = ads.map((ad) => {
-      const { data } = supabase.storage
-        .from("advertisements")
-        .getPublicUrl(ad.mediaUrl);
-
       return {
         id: ad.id,
         title: ad.title,
-        mediaUrl: data.publicUrl,
+        mediaUrl: ad.mediaUrl,
         mediaType: ad.mediaType,
         duration: ad.duration,
         category: ad.category,
@@ -56,3 +49,4 @@ export async function GET() {
     );
   }
 }
+
