@@ -134,12 +134,19 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      path: filePath,
-      fileName: file.name,
-      mediaType: isImage ? "image" : "video",
-    });
+   const {
+  data: { publicUrl },
+} = storageClient.storage
+  .from("advertisements")
+  .getPublicUrl(filePath);
+
+return NextResponse.json({
+  success: true,
+  path: filePath,
+  publicUrl,
+  fileName: file.name,
+  mediaType: isImage ? "image" : "video",
+});
   } catch (error) {
     console.error(
       "Advertisement upload error:",

@@ -287,7 +287,7 @@ function CreateAdvertisementContent() {
 
         mediaFileName: selectedMediaFile.name,
 
-        mediaUrl: data.path,
+        mediaUrl: data.publicUrl,
 
         mediaType: data.mediaType,
 
