@@ -461,7 +461,7 @@ const clearFilters = () => {
 <section
   className="relative overflow-hidden bg-slate-950 text-white"
   style={{
-    backgroundImage: "url('/hero.jpg')",
+    backgroundImage: "url('/hero.webp')",
     backgroundSize: "cover",
     backgroundPosition: "center",
   }}
