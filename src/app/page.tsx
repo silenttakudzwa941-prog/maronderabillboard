@@ -259,17 +259,17 @@ useEffect(() => {
   const closeMenu = () => {
     setMenuOpen(false);
   };
-  const filteredAds = ads.filter((ad) => {
+const filteredAds = ads.filter((ad) => {
   const search = searchTerm.trim().toLowerCase();
 
   const matchesSearch =
     !search ||
-    ad.title.toLowerCase().includes(search) ||
-    ad.category.toLowerCase().includes(search) ||
-    ad.subcategory.toLowerCase().includes(search) ||
-    ad.location?.toLowerCase().includes(search) ||
-    ad.advertiser?.businessName
-      ?.toLowerCase()
+    (ad.title ?? "").toLowerCase().includes(search) ||
+    (ad.category ?? "").toLowerCase().includes(search) ||
+    (ad.subcategory ?? "").toLowerCase().includes(search) ||
+    (ad.location ?? "").toLowerCase().includes(search) ||
+    (ad.advertiser?.businessName ?? "")
+      .toLowerCase()
       .includes(search);
 
   const matchesCategory =
@@ -311,12 +311,12 @@ const clearFilters = () => {
             className="flex items-center gap-3 touch-manipulation"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-900 text-lg font-black text-white">
-              ZDB
+              ZBM
             </div>
 
             <div>
               <div className="text-lg font-black text-blue-900">
-                Zim Digital Billboards
+                Zim Billboards Media
               </div>
 
               <div className="text-xs text-slate-500">
@@ -587,7 +587,7 @@ const clearFilters = () => {
             </div>
 
             <span className="text-xs font-semibold text-slate-400">
-              Zim Digital Billboard
+              Zim Billboards Media
             </span>
           </div>
 
@@ -1063,7 +1063,7 @@ const clearFilters = () => {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <div className="text-sm font-black uppercase tracking-widest text-blue-700">
-              Why Zim Digital Billboards?
+              Why Zim Billboards Media?
             </div>
 
             <h2 className="mt-3 text-3xl font-black md:text-4xl">
@@ -1367,7 +1367,7 @@ const clearFilters = () => {
             href="/advertise"
             className="mt-8 inline-block rounded-xl bg-blue-950 px-8 py-4 font-black text-white shadow-lg transition hover:bg-blue-900"
           >
-            Advertise on Zim Digital Billboards →
+            Advertise on Zim Billboards Media →
           </a>
         </div>
       </section>
@@ -1378,7 +1378,7 @@ const clearFilters = () => {
           {/* Brand */}
           <div className="md:col-span-2">
             <h2 className="text-2xl font-black text-white">
-              Zim Digital Billboards
+              Zim Billboards Media
             </h2>
 
             <p className="mt-4 max-w-xl text-slate-400">
@@ -1521,7 +1521,7 @@ const clearFilters = () => {
         {/* Bottom Bar */}
         <div className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
           <p>
-            © {new Date().getFullYear()} Zim Digital Billboards. All rights
+            © {new Date().getFullYear()} Zim Billboards Media. All rights
             reserved.
           </p>
 

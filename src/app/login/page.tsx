@@ -95,12 +95,12 @@ export default function LoginPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-950 text-xl font-black text-white">
-              ZD
+              ZB
             </div>
 
             <div>
               <div className="text-lg font-black text-blue-950">
-                ZimDigitalBillboard
+                ZimBillboards 
               </div>
 
               <div className="text-xs text-slate-500">
@@ -276,7 +276,7 @@ export default function LoginPage() {
               <div className="h-px flex-1 bg-slate-200" />
 
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                New to ZimDigitalBillboard?
+                New to Zim Billboards Media?
               </span>
 
               <div className="h-px flex-1 bg-slate-200" />
@@ -297,7 +297,7 @@ export default function LoginPage() {
               href="/"
               className="text-sm font-semibold text-slate-500 hover:text-blue-900"
             >
-              ← Back to ZimDigitalBillboard
+              ← Back to ZimBillboards 
             </Link>
           </div>
         </div>
