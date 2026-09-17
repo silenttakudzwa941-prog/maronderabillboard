@@ -13,42 +13,52 @@ export async function GET() {
         { status: 401 }
       );
     }
-const [
-  pendingAds,
-  pendingPayments,
-  pendingOrders,
-  unpaidOrders,
-] = await Promise.all([
-        prisma.ad.count({
-          where: {
-            status: "pending",
-          },
-        }),
 
-        prisma.payment.count({
-          where: {
-            status: "pending",
-          },
-        }),
+    const [
+      pendingAds,
+      pendingPayments,
+      pendingOrders,
+      unpaidOrders,
+      pendingSellerSubscriptions,
+    ] = await Promise.all([
+      prisma.ad.count({
+        where: {
+          status: "pending",
+        },
+      }),
 
-        prisma.order.count({
-          where: {
-            status: "pending",
-          },
-        }),
-        prisma.order.count({
-  where: {
-    payment: null,
-  },
-}),
-      ]);
+      prisma.payment.count({
+        where: {
+          status: "pending",
+        },
+      }),
 
-   return NextResponse.json({
-  pendingAds,
-  pendingPayments,
-  pendingOrders,
-  unpaidOrders,
-});
+      prisma.order.count({
+        where: {
+          status: "pending",
+        },
+      }),
+
+      prisma.order.count({
+        where: {
+          payment: null,
+        },
+      }),
+
+      prisma.sellerSubscription.count({
+        where: {
+          status: "pending",
+        },
+      }),
+    ]);
+
+    return NextResponse.json({
+      pendingAds,
+      pendingPayments,
+      pendingOrders,
+      unpaidOrders,
+      pendingSellerSubscriptions,
+    });
   } catch (error) {
     console.error("Admin attention error:", error);
 

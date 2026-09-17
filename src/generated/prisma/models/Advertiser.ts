@@ -184,6 +184,8 @@ export type AdvertiserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Advertiser"> | Date | string
   ads?: Prisma.AdListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  products?: Prisma.ProductListRelationFilter
+  sellerSubscription?: Prisma.XOR<Prisma.SellerSubscriptionNullableScalarRelationFilter, Prisma.SellerSubscriptionWhereInput> | null
 }
 
 export type AdvertiserOrderByWithRelationInput = {
@@ -194,6 +196,8 @@ export type AdvertiserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   ads?: Prisma.AdOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
+  products?: Prisma.ProductOrderByRelationAggregateInput
+  sellerSubscription?: Prisma.SellerSubscriptionOrderByWithRelationInput
 }
 
 export type AdvertiserWhereUniqueInput = Prisma.AtLeast<{
@@ -207,6 +211,8 @@ export type AdvertiserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Advertiser"> | Date | string
   ads?: Prisma.AdListRelationFilter
   orders?: Prisma.OrderListRelationFilter
+  products?: Prisma.ProductListRelationFilter
+  sellerSubscription?: Prisma.XOR<Prisma.SellerSubscriptionNullableScalarRelationFilter, Prisma.SellerSubscriptionWhereInput> | null
 }, "id" | "email">
 
 export type AdvertiserOrderByWithAggregationInput = {
@@ -239,6 +245,8 @@ export type AdvertiserCreateInput = {
   createdAt?: Date | string
   ads?: Prisma.AdCreateNestedManyWithoutAdvertiserInput
   orders?: Prisma.OrderCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionCreateNestedOneWithoutAdvertiserInput
 }
 
 export type AdvertiserUncheckedCreateInput = {
@@ -249,6 +257,8 @@ export type AdvertiserUncheckedCreateInput = {
   createdAt?: Date | string
   ads?: Prisma.AdUncheckedCreateNestedManyWithoutAdvertiserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedCreateNestedOneWithoutAdvertiserInput
 }
 
 export type AdvertiserUpdateInput = {
@@ -259,6 +269,8 @@ export type AdvertiserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ads?: Prisma.AdUpdateManyWithoutAdvertiserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUpdateOneWithoutAdvertiserNestedInput
 }
 
 export type AdvertiserUncheckedUpdateInput = {
@@ -269,6 +281,8 @@ export type AdvertiserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ads?: Prisma.AdUncheckedUpdateManyWithoutAdvertiserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedUpdateOneWithoutAdvertiserNestedInput
 }
 
 export type AdvertiserCreateManyInput = {
@@ -332,6 +346,34 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type AdvertiserCreateNestedOneWithoutSellerSubscriptionInput = {
+  create?: Prisma.XOR<Prisma.AdvertiserCreateWithoutSellerSubscriptionInput, Prisma.AdvertiserUncheckedCreateWithoutSellerSubscriptionInput>
+  connectOrCreate?: Prisma.AdvertiserCreateOrConnectWithoutSellerSubscriptionInput
+  connect?: Prisma.AdvertiserWhereUniqueInput
+}
+
+export type AdvertiserUpdateOneRequiredWithoutSellerSubscriptionNestedInput = {
+  create?: Prisma.XOR<Prisma.AdvertiserCreateWithoutSellerSubscriptionInput, Prisma.AdvertiserUncheckedCreateWithoutSellerSubscriptionInput>
+  connectOrCreate?: Prisma.AdvertiserCreateOrConnectWithoutSellerSubscriptionInput
+  upsert?: Prisma.AdvertiserUpsertWithoutSellerSubscriptionInput
+  connect?: Prisma.AdvertiserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdvertiserUpdateToOneWithWhereWithoutSellerSubscriptionInput, Prisma.AdvertiserUpdateWithoutSellerSubscriptionInput>, Prisma.AdvertiserUncheckedUpdateWithoutSellerSubscriptionInput>
+}
+
+export type AdvertiserCreateNestedOneWithoutProductsInput = {
+  create?: Prisma.XOR<Prisma.AdvertiserCreateWithoutProductsInput, Prisma.AdvertiserUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.AdvertiserCreateOrConnectWithoutProductsInput
+  connect?: Prisma.AdvertiserWhereUniqueInput
+}
+
+export type AdvertiserUpdateOneRequiredWithoutProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.AdvertiserCreateWithoutProductsInput, Prisma.AdvertiserUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.AdvertiserCreateOrConnectWithoutProductsInput
+  upsert?: Prisma.AdvertiserUpsertWithoutProductsInput
+  connect?: Prisma.AdvertiserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdvertiserUpdateToOneWithWhereWithoutProductsInput, Prisma.AdvertiserUpdateWithoutProductsInput>, Prisma.AdvertiserUncheckedUpdateWithoutProductsInput>
+}
+
 export type AdvertiserCreateNestedOneWithoutAdsInput = {
   create?: Prisma.XOR<Prisma.AdvertiserCreateWithoutAdsInput, Prisma.AdvertiserUncheckedCreateWithoutAdsInput>
   connectOrCreate?: Prisma.AdvertiserCreateOrConnectWithoutAdsInput
@@ -360,6 +402,126 @@ export type AdvertiserUpdateOneRequiredWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdvertiserUpdateToOneWithWhereWithoutOrdersInput, Prisma.AdvertiserUpdateWithoutOrdersInput>, Prisma.AdvertiserUncheckedUpdateWithoutOrdersInput>
 }
 
+export type AdvertiserCreateWithoutSellerSubscriptionInput = {
+  id: string
+  businessName: string
+  email: string
+  phone: string
+  createdAt?: Date | string
+  ads?: Prisma.AdCreateNestedManyWithoutAdvertiserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductCreateNestedManyWithoutAdvertiserInput
+}
+
+export type AdvertiserUncheckedCreateWithoutSellerSubscriptionInput = {
+  id: string
+  businessName: string
+  email: string
+  phone: string
+  createdAt?: Date | string
+  ads?: Prisma.AdUncheckedCreateNestedManyWithoutAdvertiserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutAdvertiserInput
+}
+
+export type AdvertiserCreateOrConnectWithoutSellerSubscriptionInput = {
+  where: Prisma.AdvertiserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdvertiserCreateWithoutSellerSubscriptionInput, Prisma.AdvertiserUncheckedCreateWithoutSellerSubscriptionInput>
+}
+
+export type AdvertiserUpsertWithoutSellerSubscriptionInput = {
+  update: Prisma.XOR<Prisma.AdvertiserUpdateWithoutSellerSubscriptionInput, Prisma.AdvertiserUncheckedUpdateWithoutSellerSubscriptionInput>
+  create: Prisma.XOR<Prisma.AdvertiserCreateWithoutSellerSubscriptionInput, Prisma.AdvertiserUncheckedCreateWithoutSellerSubscriptionInput>
+  where?: Prisma.AdvertiserWhereInput
+}
+
+export type AdvertiserUpdateToOneWithWhereWithoutSellerSubscriptionInput = {
+  where?: Prisma.AdvertiserWhereInput
+  data: Prisma.XOR<Prisma.AdvertiserUpdateWithoutSellerSubscriptionInput, Prisma.AdvertiserUncheckedUpdateWithoutSellerSubscriptionInput>
+}
+
+export type AdvertiserUpdateWithoutSellerSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ads?: Prisma.AdUpdateManyWithoutAdvertiserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutAdvertiserNestedInput
+}
+
+export type AdvertiserUncheckedUpdateWithoutSellerSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ads?: Prisma.AdUncheckedUpdateManyWithoutAdvertiserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutAdvertiserNestedInput
+}
+
+export type AdvertiserCreateWithoutProductsInput = {
+  id: string
+  businessName: string
+  email: string
+  phone: string
+  createdAt?: Date | string
+  ads?: Prisma.AdCreateNestedManyWithoutAdvertiserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionCreateNestedOneWithoutAdvertiserInput
+}
+
+export type AdvertiserUncheckedCreateWithoutProductsInput = {
+  id: string
+  businessName: string
+  email: string
+  phone: string
+  createdAt?: Date | string
+  ads?: Prisma.AdUncheckedCreateNestedManyWithoutAdvertiserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedCreateNestedOneWithoutAdvertiserInput
+}
+
+export type AdvertiserCreateOrConnectWithoutProductsInput = {
+  where: Prisma.AdvertiserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdvertiserCreateWithoutProductsInput, Prisma.AdvertiserUncheckedCreateWithoutProductsInput>
+}
+
+export type AdvertiserUpsertWithoutProductsInput = {
+  update: Prisma.XOR<Prisma.AdvertiserUpdateWithoutProductsInput, Prisma.AdvertiserUncheckedUpdateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.AdvertiserCreateWithoutProductsInput, Prisma.AdvertiserUncheckedCreateWithoutProductsInput>
+  where?: Prisma.AdvertiserWhereInput
+}
+
+export type AdvertiserUpdateToOneWithWhereWithoutProductsInput = {
+  where?: Prisma.AdvertiserWhereInput
+  data: Prisma.XOR<Prisma.AdvertiserUpdateWithoutProductsInput, Prisma.AdvertiserUncheckedUpdateWithoutProductsInput>
+}
+
+export type AdvertiserUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ads?: Prisma.AdUpdateManyWithoutAdvertiserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUpdateOneWithoutAdvertiserNestedInput
+}
+
+export type AdvertiserUncheckedUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  businessName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ads?: Prisma.AdUncheckedUpdateManyWithoutAdvertiserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedUpdateOneWithoutAdvertiserNestedInput
+}
+
 export type AdvertiserCreateWithoutAdsInput = {
   id: string
   businessName: string
@@ -367,6 +529,8 @@ export type AdvertiserCreateWithoutAdsInput = {
   phone: string
   createdAt?: Date | string
   orders?: Prisma.OrderCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionCreateNestedOneWithoutAdvertiserInput
 }
 
 export type AdvertiserUncheckedCreateWithoutAdsInput = {
@@ -376,6 +540,8 @@ export type AdvertiserUncheckedCreateWithoutAdsInput = {
   phone: string
   createdAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedCreateNestedOneWithoutAdvertiserInput
 }
 
 export type AdvertiserCreateOrConnectWithoutAdsInput = {
@@ -401,6 +567,8 @@ export type AdvertiserUpdateWithoutAdsInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUpdateOneWithoutAdvertiserNestedInput
 }
 
 export type AdvertiserUncheckedUpdateWithoutAdsInput = {
@@ -410,6 +578,8 @@ export type AdvertiserUncheckedUpdateWithoutAdsInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedUpdateOneWithoutAdvertiserNestedInput
 }
 
 export type AdvertiserCreateWithoutOrdersInput = {
@@ -419,6 +589,8 @@ export type AdvertiserCreateWithoutOrdersInput = {
   phone: string
   createdAt?: Date | string
   ads?: Prisma.AdCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionCreateNestedOneWithoutAdvertiserInput
 }
 
 export type AdvertiserUncheckedCreateWithoutOrdersInput = {
@@ -428,6 +600,8 @@ export type AdvertiserUncheckedCreateWithoutOrdersInput = {
   phone: string
   createdAt?: Date | string
   ads?: Prisma.AdUncheckedCreateNestedManyWithoutAdvertiserInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutAdvertiserInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedCreateNestedOneWithoutAdvertiserInput
 }
 
 export type AdvertiserCreateOrConnectWithoutOrdersInput = {
@@ -453,6 +627,8 @@ export type AdvertiserUpdateWithoutOrdersInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ads?: Prisma.AdUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUpdateOneWithoutAdvertiserNestedInput
 }
 
 export type AdvertiserUncheckedUpdateWithoutOrdersInput = {
@@ -462,6 +638,8 @@ export type AdvertiserUncheckedUpdateWithoutOrdersInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ads?: Prisma.AdUncheckedUpdateManyWithoutAdvertiserNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutAdvertiserNestedInput
+  sellerSubscription?: Prisma.SellerSubscriptionUncheckedUpdateOneWithoutAdvertiserNestedInput
 }
 
 
@@ -472,11 +650,13 @@ export type AdvertiserUncheckedUpdateWithoutOrdersInput = {
 export type AdvertiserCountOutputType = {
   ads: number
   orders: number
+  products: number
 }
 
 export type AdvertiserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ads?: boolean | AdvertiserCountOutputTypeCountAdsArgs
   orders?: boolean | AdvertiserCountOutputTypeCountOrdersArgs
+  products?: boolean | AdvertiserCountOutputTypeCountProductsArgs
 }
 
 /**
@@ -503,6 +683,13 @@ export type AdvertiserCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Typ
   where?: Prisma.OrderWhereInput
 }
 
+/**
+ * AdvertiserCountOutputType without action
+ */
+export type AdvertiserCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
 
 export type AdvertiserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -512,6 +699,8 @@ export type AdvertiserSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdAt?: boolean
   ads?: boolean | Prisma.Advertiser$adsArgs<ExtArgs>
   orders?: boolean | Prisma.Advertiser$ordersArgs<ExtArgs>
+  products?: boolean | Prisma.Advertiser$productsArgs<ExtArgs>
+  sellerSubscription?: boolean | Prisma.Advertiser$sellerSubscriptionArgs<ExtArgs>
   _count?: boolean | Prisma.AdvertiserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["advertiser"]>
 
@@ -543,6 +732,8 @@ export type AdvertiserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type AdvertiserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   ads?: boolean | Prisma.Advertiser$adsArgs<ExtArgs>
   orders?: boolean | Prisma.Advertiser$ordersArgs<ExtArgs>
+  products?: boolean | Prisma.Advertiser$productsArgs<ExtArgs>
+  sellerSubscription?: boolean | Prisma.Advertiser$sellerSubscriptionArgs<ExtArgs>
   _count?: boolean | Prisma.AdvertiserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdvertiserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -553,6 +744,8 @@ export type $AdvertiserPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     ads: Prisma.$AdPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
+    products: Prisma.$ProductPayload<ExtArgs>[]
+    sellerSubscription: Prisma.$SellerSubscriptionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -956,6 +1149,8 @@ export interface Prisma__AdvertiserClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   ads<T extends Prisma.Advertiser$adsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Advertiser$adsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Advertiser$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Advertiser$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  products<T extends Prisma.Advertiser$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Advertiser$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sellerSubscription<T extends Prisma.Advertiser$sellerSubscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Advertiser$sellerSubscriptionArgs<ExtArgs>>): Prisma.Prisma__SellerSubscriptionClient<runtime.Types.Result.GetResult<Prisma.$SellerSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1428,6 +1623,49 @@ export type Advertiser$ordersArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * Advertiser.products
+ */
+export type Advertiser$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Advertiser.sellerSubscription
+ */
+export type Advertiser$sellerSubscriptionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SellerSubscription
+   */
+  select?: Prisma.SellerSubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SellerSubscription
+   */
+  omit?: Prisma.SellerSubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SellerSubscriptionInclude<ExtArgs> | null
+  where?: Prisma.SellerSubscriptionWhereInput
 }
 
 /**

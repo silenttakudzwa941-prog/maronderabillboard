@@ -29,12 +29,16 @@ const navigation = [
     icon: "🧾",
   },
   {
-  name: "Payments",
-  href: "/admin/payments",
-  icon: "💳",
-},
+    name: "Payments",
+    href: "/admin/payments",
+    icon: "💳",
+  },
+  {
+    name: "Seller Subscriptions",
+    href: "/admin/seller-subscriptions",
+    icon: "🛍️",
+  },
 ];
-
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -44,6 +48,7 @@ const [attention, setAttention] = useState({
   pendingPayments: 0,
   pendingOrders: 0,
   unpaidOrders: 0,
+  pendingSellerSubscriptions: 0,
 });
     useEffect(() => {
     async function loadAttention() {
@@ -56,11 +61,13 @@ const [attention, setAttention] = useState({
 
         const data = await response.json();
 
-        setAttention({
+  setAttention({
   pendingAds: data.pendingAds ?? 0,
   pendingPayments: data.pendingPayments ?? 0,
   pendingOrders: data.pendingOrders ?? 0,
   unpaidOrders: data.unpaidOrders ?? 0,
+  pendingSellerSubscriptions:
+    data.pendingSellerSubscriptions ?? 0,
 });
       } catch {
         // Keep sidebar usable if the attention request fails.
@@ -88,9 +95,9 @@ async function handleLogout() {
             href="/admin/dashboard"
             className="block"
           >
-            <p className="text-xl font-black">
-              MaronderaBillboard
-            </p>
+           <p className="text-xl font-black">
+  Zim Billboards Media
+</p>
 
             <p className="mt-1 text-xs font-medium text-blue-200">
               Admin Panel
@@ -148,6 +155,12 @@ async function handleLogout() {
       {attention.pendingPayments}
     </span>
   )} 
+  {item.name === "Seller Subscriptions" &&
+  attention.pendingSellerSubscriptions > 0 && (
+    <span className="min-w-[24px] rounded-full bg-emerald-500 px-2 py-1 text-center text-[11px] font-black text-white">
+      {attention.pendingSellerSubscriptions}
+    </span>
+  )}
                 </Link>
               );
             })}

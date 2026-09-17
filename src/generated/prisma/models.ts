@@ -9,6 +9,8 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Advertiser'
+export type * from './models/SellerSubscription'
+export type * from './models/Product'
 export type * from './models/Ad'
 export type * from './models/Order'
 export type * from './models/Payment'

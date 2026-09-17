@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Advertiser: 'Advertiser',
+  SellerSubscription: 'SellerSubscription',
+  Product: 'Product',
   Ad: 'Ad',
   Order: 'Order',
   Payment: 'Payment',
@@ -83,6 +85,42 @@ export const AdvertiserScalarFieldEnum = {
 } as const
 
 export type AdvertiserScalarFieldEnum = (typeof AdvertiserScalarFieldEnum)[keyof typeof AdvertiserScalarFieldEnum]
+
+
+export const SellerSubscriptionScalarFieldEnum = {
+  id: 'id',
+  advertiserId: 'advertiserId',
+  planName: 'planName',
+  amount: 'amount',
+  status: 'status',
+  paymentMethod: 'paymentMethod',
+  paymentReference: 'paymentReference',
+  startsAt: 'startsAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SellerSubscriptionScalarFieldEnum = (typeof SellerSubscriptionScalarFieldEnum)[keyof typeof SellerSubscriptionScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  price: 'price',
+  imageUrl: 'imageUrl',
+  category: 'category',
+  location: 'location',
+  stock: 'stock',
+  status: 'status',
+  views: 'views',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  advertiserId: 'advertiserId'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
 
 
 export const AdScalarFieldEnum = {

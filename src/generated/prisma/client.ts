@@ -47,6 +47,16 @@ export { Prisma }
  */
 export type Advertiser = Prisma.AdvertiserModel
 /**
+ * Model SellerSubscription
+ * 
+ */
+export type SellerSubscription = Prisma.SellerSubscriptionModel
+/**
+ * Model Product
+ * 
+ */
+export type Product = Prisma.ProductModel
+/**
  * Model Ad
  * 
  */

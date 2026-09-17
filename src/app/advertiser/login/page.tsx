@@ -83,11 +83,11 @@ function AdvertiserLoginContent() {
      * This is more reliable for Safari/iPhone because the
      * Supabase session cookie has already been stored.
      */
-    if (isAdmin) {
-      window.location.href = "/admin/dashboard";
-    } else {
-      window.location.href = "/advertise";
-    }
+if (isAdmin) {
+  window.location.href = "/admin/dashboard";
+} else {
+  window.location.href = redirectPath;
+}
   } catch (error) {
     console.error("Login error:", error);
 

@@ -20,7 +20,7 @@ type Advertisement = {
   mediaType: string;
   duration: number | null;
   category: string;
-   subcategory: string;
+   subcategory: string | null;
   location: string | null;
   status: string;
   views: number;
@@ -316,7 +316,7 @@ const clearFilters = () => {
 
             <div>
               <div className="text-lg font-black text-blue-900">
-                Zim Billboards Media
+                ZIMBILLBOARDS MEDIA
               </div>
 
               <div className="text-xs text-slate-500">
@@ -325,138 +325,157 @@ const clearFilters = () => {
             </div>
           </Link>
 
-          {/* DESKTOP NAVIGATION */}
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/"
-              className="text-sm font-semibold text-blue-900"
-            >
-              Home
-            </Link>
+ {/* DESKTOP NAVIGATION */}
+<nav className="hidden items-center gap-8 md:flex">
+  <Link
+    href="/"
+    className="text-sm font-semibold text-blue-900"
+  >
+    Home
+  </Link>
 
-            <a
-              href="#advertisements"
-              className="text-sm font-medium text-slate-600 hover:text-blue-900"
-            >
-              Browse Ads
-            </a>
+  <Link
+    href="/shop"
+    className="text-sm font-medium text-slate-600 hover:text-blue-900"
+  >
+    Marketplace
+  </Link>
 
-            <a
-              href="#how-it-works"
-              className="text-sm font-medium text-slate-600 hover:text-blue-900"
-            >
-              How It Works
-            </a>
+  <a
+    href="#advertisements"
+    className="text-sm font-medium text-slate-600 hover:text-blue-900"
+  >
+    Browse Ads
+  </a>
 
-            <a
-              href="#pricing"
-              className="text-sm font-medium text-slate-600 hover:text-blue-900"
-            >
-              Pricing
-            </a>
+  <a
+    href="#how-it-works"
+    className="text-sm font-medium text-slate-600 hover:text-blue-900"
+  >
+    How It Works
+  </a>
 
-            <div className="flex items-center gap-3">
-              <a
-                href="/login"
-                className="rounded-lg px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-900"
-              >
-                Log in
-              </a>
+  <a
+    href="#pricing"
+    className="text-sm font-medium text-slate-600 hover:text-blue-900"
+  >
+    Pricing
+  </a>
 
-              <a
-                href="/signup"
-                className="rounded-lg bg-yellow-400 px-5 py-3 text-sm font-bold text-blue-950 shadow-sm transition hover:bg-yellow-300"
-              >
-                Get Started
-              </a>
-            </div>
-          </nav>
+  <div className="flex items-center gap-3">
+    <a
+      href="/login"
+      className="rounded-lg px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-blue-900"
+    >
+      Log in
+    </a>
 
-          {/* MOBILE MENU BUTTON */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen((current) => !current)}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
-            aria-label={
-              menuOpen
-                ? "Close navigation menu"
-                : "Open navigation menu"
-            }
-            className="relative z-[110] flex h-12 w-12 min-h-12 min-w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-2xl font-bold text-slate-900 shadow-sm touch-manipulation select-none pointer-events-auto active:scale-95 md:hidden"
-          >
-            <span
-              aria-hidden="true"
-              className="pointer-events-none leading-none"
-            >
-              {menuOpen ? "✕" : "☰"}
-            </span>
-          </button>
-        </div>
+    <a
+      href="/signup"
+      className="rounded-lg bg-yellow-400 px-5 py-3 text-sm font-bold text-blue-950 shadow-sm transition hover:bg-yellow-300"
+    >
+      Get Started
+    </a>
+  </div>
+</nav>
 
-        {/* MOBILE NAVIGATION */}
-        <div
-          id="mobile-navigation"
-          className={`relative z-[105] border-t border-slate-200 bg-white px-6 py-4 md:hidden ${
-            menuOpen ? "block" : "hidden"
-          }`}
-        >
-          <nav className="mx-auto max-w-7xl">
-            <div className="flex flex-col gap-2">
-              <Link
-                href="/"
-                onClick={closeMenu}
-                className="flex min-h-[48px] items-center rounded-xl px-4 py-3 font-semibold text-slate-900 touch-manipulation active:bg-slate-100"
-              >
-                Home
-              </Link>
+       {/* MOBILE MENU BUTTON */}
+<button
+  type="button"
+  onClick={() => setMenuOpen((current) => !current)}
+  aria-expanded={menuOpen}
+  aria-controls="mobile-navigation"
+  aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+  className="relative z-[200] flex h-12 w-12 min-h-12 min-w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-2xl font-bold text-slate-900 shadow-sm md:hidden"
+>
+  <span
+    aria-hidden="true"
+    className="leading-none"
+  >
+    {menuOpen ? "✕" : "☰"}
+  </span>
+</button>
+</div>
 
-              <a
-                href="#advertisements"
-                onClick={closeMenu}
-                className="flex min-h-[48px] items-center rounded-xl px-4 py-3 font-medium text-slate-700 touch-manipulation active:bg-slate-100"
-              >
-                Browse Ads
-              </a>
+{/* MOBILE NAVIGATION */}
+<div
+  id="mobile-navigation"
+  className={`absolute left-0 right-0 top-full z-[190] border-t border-slate-200 bg-white shadow-xl md:hidden ${
+    menuOpen ? "block" : "hidden"
+  }`}
+>
+  <nav className="mx-auto max-w-7xl px-6 py-4">
+    <div className="flex flex-col gap-2">
 
-              <a
-                href="#how-it-works"
-                onClick={closeMenu}
-                className="flex min-h-[48px] items-center rounded-xl px-4 py-3 font-medium text-slate-700 touch-manipulation active:bg-slate-100"
-              >
-                How It Works
-              </a>
+      {/* HOME */}
+      <Link
+        href="/"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center rounded-xl px-4 py-3 font-semibold text-slate-900 active:bg-slate-100"
+      >
+        Home
+      </Link>
 
-              <a
-                href="#pricing"
-                onClick={closeMenu}
-                className="flex min-h-[48px] items-center rounded-xl px-4 py-3 font-medium text-slate-700 touch-manipulation active:bg-slate-100"
-              >
-                Pricing
-              </a>
+      {/* MARKETPLACE */}
+      <Link
+        href="/shop"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center rounded-xl px-4 py-3 font-semibold text-slate-900 active:bg-slate-100"
+      >
+        🛍️ Marketplace
+      </Link>
 
-              <div className="my-2 border-t border-slate-200" />
+      {/* BROWSE ADS */}
+      <a
+        href="#advertisements"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center rounded-xl px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
+      >
+        Browse Ads
+      </a>
 
-              <a
-                href="/login"
-                onClick={closeMenu}
-                className="flex min-h-[50px] items-center justify-center rounded-xl border border-slate-200 px-4 py-3 font-bold text-slate-700 touch-manipulation active:bg-slate-100"
-              >
-                Log in
-              </a>
+      {/* HOW IT WORKS */}
+      <a
+        href="#how-it-works"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center rounded-xl px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
+      >
+        How It Works
+      </a>
 
-              <a
-                href="/signup"
-                onClick={closeMenu}
-                className="flex min-h-[50px] items-center justify-center rounded-xl bg-yellow-400 px-4 py-3 font-bold text-blue-950 touch-manipulation active:scale-[0.98]"
-              >
-                Get Started
-              </a>
-            </div>
-          </nav>
-        </div>
-      </header>
+      {/* PRICING */}
+      <a
+        href="#pricing"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center rounded-xl px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
+      >
+        Pricing
+      </a>
 
+      <div className="my-2 border-t border-slate-200" />
+
+      {/* LOGIN */}
+      <a
+        href="/login"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center justify-center rounded-xl border border-slate-200 px-4 py-3 font-bold text-slate-700 active:bg-slate-100"
+      >
+        Log in
+      </a>
+
+      {/* GET STARTED */}
+      <a
+        href="/signup"
+        onClick={closeMenu}
+        className="flex min-h-[50px] items-center justify-center rounded-xl bg-yellow-400 px-4 py-3 font-bold text-blue-950 active:scale-[0.98]"
+      >
+        Get Started
+      </a>
+
+    </div>
+  </nav>
+</div>
+</header>
      {/* HERO */}
 <section
   className="relative overflow-hidden bg-slate-950 text-white"
@@ -587,7 +606,7 @@ const clearFilters = () => {
             </div>
 
             <span className="text-xs font-semibold text-slate-400">
-              Zim Billboards Media
+              ZIMBILLBOARDS MEDIA
             </span>
           </div>
 
@@ -673,7 +692,7 @@ const clearFilters = () => {
       </p>
 
       <div className="mt-8 rounded-xl bg-green-600 px-5 py-3 text-sm font-black text-white shadow-lg">
-        💬 Advertise With ZimDigitalBillboard
+        💬 Advertise With ZimBillboards
       </div>
     </div>
   )}
@@ -897,12 +916,12 @@ const clearFilters = () => {
 </div>
           </div>
 
-          <a
-            href="#advertisements"
-            className="font-bold text-blue-700 hover:text-blue-900"
-          >
-            View All Ads →
-          </a>
+          <Link
+  href="/ads"
+  className="font-bold text-blue-700 hover:text-blue-900"
+>
+  View All Ads →
+</Link>
         </div>
 
         {/* LOADING */}
@@ -937,8 +956,7 @@ const clearFilters = () => {
             </h3>
 
             <p className="mx-auto mt-3 max-w-xl text-slate-500">
-              Be one of the first businesses to advertise on Zim Digital
-              Billboards and reach customers around the World.
+              Be one of the first businesses to advertise on Zim Billboards and reach customers around the World.
             </p>
 
             <a
@@ -984,7 +1002,7 @@ const clearFilters = () => {
                   className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
                 >
                   <div className="relative">
-                    {ad.mediaType.toLowerCase() === "video" ? (
+                    {(ad.mediaType ?? "").toLowerCase() === "video" ? (
                       <video
                         src={ad.mediaUrl}
                         controls
@@ -1057,13 +1075,50 @@ const clearFilters = () => {
           </div>
         )}
       </section>
+      {/* MARKETPLACE PREVIEW */}
+      <section className="bg-slate-50 py-20">
+        <div className="mx-auto max-w-7xl px-6">
 
+          {/* SECTION HEADER */}
+          <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <div className="text-sm font-black uppercase tracking-widest text-blue-700">
+                🛍️ Marketplace
+              </div>
+
+              <h2 className="mt-2 text-3xl font-black md:text-4xl">
+                Shop Products From Local Businesses
+              </h2>
+
+              <p className="mt-3 max-w-2xl text-slate-500">
+                Discover products from businesses and sellers on
+                ZIMBILLBOARDS MEDIA. Browse local listings and contact
+                sellers directly on WhatsApp.
+              </p>
+            </div>
+
+            <Link
+              href="/shop"
+              className="group inline-flex items-center gap-2 font-bold text-blue-700 transition hover:text-blue-900"
+            >
+              View All Products
+              <span className="transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
+          </div>
+
+          {/* MARKETPLACE PRODUCTS */}
+          <MarketplacePreview />
+
+        </div>
+      </section>
       {/* WHY ADVERTISE */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <div className="text-sm font-black uppercase tracking-widest text-blue-700">
-              Why Zim Billboards Media?
+              Why ZIMBILLBOARDS MEDIA?
             </div>
 
             <h2 className="mt-3 text-3xl font-black md:text-4xl">
@@ -1367,7 +1422,7 @@ const clearFilters = () => {
             href="/advertise"
             className="mt-8 inline-block rounded-xl bg-blue-950 px-8 py-4 font-black text-white shadow-lg transition hover:bg-blue-900"
           >
-            Advertise on Zim Billboards Media →
+            Advertise on ZIMBILLBOARDS MEDIA →
           </a>
         </div>
       </section>
@@ -1378,7 +1433,7 @@ const clearFilters = () => {
           {/* Brand */}
           <div className="md:col-span-2">
             <h2 className="text-2xl font-black text-white">
-              Zim Billboards Media
+              ZIMBILLBOARDS MEDIA
             </h2>
 
             <p className="mt-4 max-w-xl text-slate-400">
@@ -1521,7 +1576,7 @@ const clearFilters = () => {
         {/* Bottom Bar */}
         <div className="border-t border-slate-800 px-6 py-6 text-center text-sm text-slate-500">
           <p>
-            © {new Date().getFullYear()} Zim Billboards Media. All rights
+            © {new Date().getFullYear()} ZIMBILLBOARDS MEDIA. All rights
             reserved.
           </p>
 
@@ -1555,6 +1610,279 @@ const clearFilters = () => {
         </div>
       </footer>
     </main>
+  );
+}
+type MarketplaceProduct = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number | string;
+  imageUrl: string | null;
+  category: string;
+  location: string | null;
+  stock: number;
+  status: string;
+  advertiser: {
+    id: string;
+    businessName: string;
+    phone: string | null;
+    email: string | null;
+  };
+};
+
+function MarketplacePreview() {
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const response = await fetch(
+          "/api/products",
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load marketplace products"
+          );
+        }
+
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setProducts(data.slice(0, 4));
+        } else {
+          setProducts([]);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to load marketplace products:",
+          error
+        );
+
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProducts();
+  }, []);
+
+  function getStockLabel(stock: number) {
+    if (stock <= 0) {
+      return {
+        label: "Out of Stock",
+        className:
+          "bg-red-100 text-red-700",
+      };
+    }
+
+    if (stock <= 3) {
+      return {
+        label: "Limited Stock",
+        className:
+          "bg-orange-100 text-orange-700",
+      };
+    }
+
+    return {
+      label: "In Stock",
+      className:
+        "bg-green-100 text-green-700",
+    };
+  }
+
+  function getWhatsAppNumber(phone: string | null) {
+    if (!phone) return null;
+
+    let number = phone.replace(/\D/g, "");
+
+    if (number.startsWith("0")) {
+      number =
+        "263" + number.substring(1);
+    }
+
+    if (
+      number.startsWith("7") &&
+      number.length === 9
+    ) {
+      number = "263" + number;
+    }
+
+    return number;
+  }
+
+  if (loading) {
+    return (
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+          >
+            <div className="h-56 animate-pulse bg-slate-200" />
+
+            <div className="p-5">
+              <div className="h-5 w-3/4 animate-pulse rounded bg-slate-200" />
+
+              <div className="mt-3 h-7 w-1/2 animate-pulse rounded bg-slate-200" />
+
+              <div className="mt-4 h-4 w-2/3 animate-pulse rounded bg-slate-200" />
+
+              <div className="mt-5 h-11 animate-pulse rounded-xl bg-slate-200" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+        <div className="text-5xl">
+          🛍️
+        </div>
+
+        <h3 className="mt-5 text-2xl font-black text-slate-900">
+          Marketplace Coming to Life
+        </h3>
+
+        <p className="mx-auto mt-3 max-w-xl text-slate-500">
+          Sellers can list their products on
+          ZIMBILLBOARDS MEDIA and connect directly
+          with customers through WhatsApp.
+        </p>
+
+        <Link
+          href="/advertiser/seller"
+          className="mt-7 inline-flex rounded-xl bg-blue-900 px-7 py-4 font-black text-white transition hover:bg-blue-800"
+        >
+          Become a Seller →
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {products.map((product) => {
+        const stock =
+          getStockLabel(product.stock);
+
+        const whatsappNumber =
+          getWhatsAppNumber(
+            product.advertiser?.phone
+          );
+
+        const whatsappMessage =
+          `Hello ${product.advertiser?.businessName || "Seller"}, I saw your ${product.name} on ZIMBILLBOARDS MEDIA and I'm interested. Is it still available?`;
+
+        const whatsappUrl =
+          whatsappNumber
+            ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+                whatsappMessage
+              )}`
+            : null;
+
+        return (
+          <article
+            key={product.id}
+            className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
+            {/* IMAGE */}
+            <Link
+              href={`/product/${product.id}`}
+              className="block"
+            >
+              <div className="relative h-56 overflow-hidden bg-slate-100">
+                {product.imageUrl ? (
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-5xl">
+                    🛍️
+                  </div>
+                )}
+
+                {/* CATEGORY */}
+                <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-black text-blue-900 shadow">
+                  {product.category}
+                </span>
+
+                {/* STOCK */}
+                <span
+                  className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-black ${stock.className}`}
+                >
+                  {stock.label}
+                </span>
+              </div>
+            </Link>
+
+            {/* DETAILS */}
+            <div className="p-5">
+              <h3 className="line-clamp-2 text-lg font-black text-slate-900">
+                {product.name}
+              </h3>
+
+              <div className="mt-3 text-2xl font-black text-blue-900">
+                $
+                {Number(product.price).toFixed(2)}
+              </div>
+
+              {product.location && (
+                <p className="mt-2 text-sm text-slate-500">
+                  📍 {product.location}
+                </p>
+              )}
+
+              <p className="mt-2 text-sm font-semibold text-slate-600">
+                {product.advertiser?.businessName ||
+                  "Seller"}
+              </p>
+
+              {/* VIEW PRODUCT */}
+              <Link
+                href={`/product/${product.id}`}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-900 py-3 text-sm font-black text-white transition hover:bg-blue-800"
+              >
+                View Product
+                <span className="transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+
+              {/* WHATSAPP */}
+              {whatsappUrl && product.stock > 0 ? (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-sm font-black text-white transition hover:bg-green-700"
+                >
+                  <FaWhatsapp className="text-lg" />
+                  WhatsApp Seller
+                </a>
+              ) : (
+                <div className="mt-2 flex w-full items-center justify-center rounded-xl bg-slate-100 py-3 text-sm font-bold text-slate-400">
+                  {product.stock <= 0
+                    ? "Out of Stock"
+                    : "Seller Contact Unavailable"}
+                </div>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
   );
 }
 

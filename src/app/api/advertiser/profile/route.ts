@@ -198,3 +198,96 @@ export async function GET() {
     );
   }
 }
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+
+    const businessName = String(
+      body.businessName || ""
+    ).trim();
+
+    const phone = String(
+      body.phone || ""
+    ).trim();
+
+    if (!businessName) {
+      return NextResponse.json(
+        {
+          error: "Business name is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!phone) {
+      return NextResponse.json(
+        {
+          error:
+            "WhatsApp / phone number is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (phone.length < 7) {
+      return NextResponse.json(
+        {
+          error:
+            "Please enter a valid WhatsApp / phone number.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const advertiser =
+      await prisma.advertiser.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          businessName,
+          phone,
+        },
+        select: {
+          id: true,
+          businessName: true,
+          email: true,
+          phone: true,
+        },
+      });
+
+    return NextResponse.json({
+      success: true,
+      message:
+        "Business profile updated successfully.",
+      advertiser,
+    });
+  } catch (error) {
+    console.error(
+      "Advertiser profile update error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Failed to update advertiser profile.",
+      },
+      { status: 500 }
+    );
+  }
+}

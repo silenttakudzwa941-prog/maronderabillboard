@@ -64,7 +64,14 @@ type Order = {
   updatedAt: string;
   payment: Payment | null;
 };
-
+type SellerSubscription = {
+  isSeller: boolean;
+  status: string;
+  planName: string | null;
+  amount: number;
+  startsAt: string | null;
+  expiresAt: string | null;
+};
 export default function AdvertiserDashboard() {
   const router = useRouter();
 
@@ -87,11 +94,33 @@ export default function AdvertiserDashboard() {
 
   const [orders, setOrders] =
     useState<Order[]>([]);
+    const [sellerSubscription, setSellerSubscription] =
+  useState<SellerSubscription | null>(null);
+
+const [sellerLoading, setSellerLoading] =
+  useState(true);
 
   const [loading, setLoading] = useState(true);
 
   const [loggingOut, setLoggingOut] =
     useState(false);
+    const [editingProfile, setEditingProfile] =
+  useState(false);
+
+const [profileBusinessName, setProfileBusinessName] =
+  useState("");
+
+const [profilePhone, setProfilePhone] =
+  useState("");
+
+const [savingProfile, setSavingProfile] =
+  useState(false);
+
+const [profileMessage, setProfileMessage] =
+  useState("");
+
+const [profileError, setProfileError] =
+  useState("");
 
   const [loadingMessage, setLoadingMessage] =
     useState("Checking your login session...");
@@ -262,14 +291,42 @@ export default function AdvertiserDashboard() {
         );
 
         setOrders(
-          Array.isArray(data.orders)
-            ? data.orders
-            : []
-        );
+  Array.isArray(data.orders)
+    ? data.orders
+    : []
+);
 
-        console.log(
-          "DASHBOARD LOAD COMPLETE"
-        );
+/*
+ * Load seller subscription status.
+ */
+try {
+  const sellerResponse = await fetch(
+    "/api/seller/subscription",
+    {
+      method: "GET",
+      cache: "no-store",
+      credentials: "include",
+    }
+  );
+
+  if (sellerResponse.ok) {
+    const sellerData =
+      await sellerResponse.json();
+
+    setSellerSubscription(sellerData);
+  }
+} catch (error) {
+  console.error(
+    "SELLER SUBSCRIPTION LOAD ERROR:",
+    error
+  );
+} finally {
+  setSellerLoading(false);
+}
+
+console.log(
+  "DASHBOARD LOAD COMPLETE"
+);
 
         setLoadingMessage(
           "Dashboard loaded."
@@ -302,8 +359,9 @@ export default function AdvertiserDashboard() {
         }
       } finally {
         if (!cancelled) {
-          setLoading(false);
-        }
+  setLoading(false);
+  setSellerLoading(false);
+}
       }
     }
 
@@ -313,7 +371,70 @@ export default function AdvertiserDashboard() {
       cancelled = true;
     };
   }, [router, supabase]);
+async function handleSaveProfile() {
+  if (!advertiser) return;
 
+  setSavingProfile(true);
+  setProfileMessage("");
+  setProfileError("");
+
+  try {
+    const response = await fetch(
+      "/api/advertiser/profile",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          businessName:
+            profileBusinessName.trim(),
+          phone: profilePhone.trim(),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setProfileError(
+        data.error ||
+          "Failed to update your profile."
+      );
+      return;
+    }
+
+    setAdvertiser((current) =>
+      current
+        ? {
+            ...current,
+            businessName:
+              data.advertiser.businessName,
+            phone:
+              data.advertiser.phone,
+          }
+        : current
+    );
+
+    setProfileMessage(
+      "Profile updated successfully."
+    );
+
+    setEditingProfile(false);
+  } catch (error) {
+    console.error(
+      "PROFILE UPDATE ERROR:",
+      error
+    );
+
+    setProfileError(
+      "Something went wrong while updating your profile."
+    );
+  } finally {
+    setSavingProfile(false);
+  }
+}
   async function handleLogout() {
     setLoggingOut(true);
 
@@ -590,57 +711,162 @@ export default function AdvertiserDashboard() {
           </div>
         </section>
 
-        {/* Business profile */}
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
-            <div>
-              <h2 className="text-xl font-black text-blue-950">
-                Business Profile
-              </h2>
+     {/* Business profile */}
+<section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+    <div>
+      <h2 className="text-xl font-black text-blue-950">
+        Business Profile
+      </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Your registered advertiser information
-              </p>
-            </div>
+      <p className="mt-1 text-sm text-slate-500">
+        Your registered advertiser information
+      </p>
+    </div>
 
-            <div className="rounded-xl bg-blue-50 px-4 py-2 text-sm font-bold text-blue-900">
-              Advertiser Account
-            </div>
-          </div>
+    {!editingProfile ? (
+      <button
+        type="button"
+        onClick={() => {
+          setProfileBusinessName(
+            advertiser.businessName
+          );
 
-          <div className="mt-6 grid gap-5 sm:grid-cols-3">
-            <div className="rounded-xl bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                Business Name
-              </p>
+          setProfilePhone(
+            advertiser.phone
+          );
 
-              <p className="mt-2 font-bold text-slate-900">
-                {advertiser.businessName}
-              </p>
-            </div>
+          setProfileMessage("");
+          setProfileError("");
+          setEditingProfile(true);
+        }}
+        className="rounded-xl bg-blue-950 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-900"
+      >
+        Edit Profile
+      </button>
+    ) : (
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setEditingProfile(false);
+            setProfileMessage("");
+            setProfileError("");
+          }}
+          disabled={savingProfile}
+          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+        >
+          Cancel
+        </button>
 
-            <div className="rounded-xl bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                Email
-              </p>
+        <button
+          type="button"
+          onClick={handleSaveProfile}
+          disabled={savingProfile}
+          className="rounded-xl bg-blue-950 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {savingProfile
+            ? "Saving..."
+            : "Save Changes"}
+        </button>
+      </div>
+    )}
+  </div>
 
-              <p className="mt-2 break-all font-bold text-slate-900">
-                {advertiser.email}
-              </p>
-            </div>
+  {profileMessage && (
+    <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-bold text-green-700">
+      {profileMessage}
+    </div>
+  )}
 
-            <div className="rounded-xl bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                Phone
-              </p>
+  {profileError && (
+    <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+      {profileError}
+    </div>
+  )}
 
-              <p className="mt-2 font-bold text-slate-900">
-                {advertiser.phone}
-              </p>
-            </div>
-          </div>
-        </section>
+  <div className="mt-6 grid gap-5 sm:grid-cols-3">
+    {/* Business Name */}
+    <div className="rounded-xl bg-slate-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+        Business Name
+      </p>
 
+      {editingProfile ? (
+        <input
+          type="text"
+          value={profileBusinessName}
+          onChange={(event) =>
+            setProfileBusinessName(
+              event.target.value
+            )
+          }
+          className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+          placeholder="Business name"
+        />
+      ) : (
+        <p className="mt-2 font-bold text-slate-900">
+          {advertiser.businessName}
+        </p>
+      )}
+    </div>
+
+    {/* Email */}
+    <div className="rounded-xl bg-slate-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+        Email
+      </p>
+
+      <p className="mt-2 break-all font-bold text-slate-900">
+        {advertiser.email}
+      </p>
+
+      <p className="mt-2 text-xs text-slate-400">
+        Email is managed by your account.
+      </p>
+    </div>
+
+    {/* WhatsApp / Phone */}
+    <div className="rounded-xl bg-slate-50 p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+        WhatsApp / Phone
+      </p>
+
+      {editingProfile ? (
+        <>
+          <input
+            type="tel"
+            value={profilePhone}
+            onChange={(event) =>
+              setProfilePhone(
+                event.target.value
+              )
+            }
+            className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-bold text-slate-900 outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+            placeholder="+263 77 123 4567"
+          />
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            This number will be used by customers
+            to contact you on WhatsApp about your
+            products.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="mt-2 font-bold text-slate-900">
+            {advertiser.phone}
+          </p>
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Customers will use this number to
+            contact you about your products.
+          </p>
+        </>
+      )}
+    </div>
+  </div>
+</section>
         {/* Quick actions */}
         <section className="mb-8">
           <div className="mb-4">
@@ -653,7 +879,7 @@ export default function AdvertiserDashboard() {
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             <Link
               href="/advertise"
               className="group rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-md"
@@ -716,6 +942,92 @@ export default function AdvertiserDashboard() {
                 View orders →
               </div>
             </Link>
+            {/* Seller Marketplace */}
+{sellerLoading ? (
+  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-2xl">
+      🛍️
+    </div>
+
+    <h3 className="mt-5 text-lg font-black text-blue-950">
+      Seller Marketplace
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-slate-600">
+      Checking your seller membership...
+    </p>
+  </div>
+) : sellerSubscription?.isSeller ? (
+  <Link
+    href="/advertiser/products"
+    className="group rounded-2xl border border-green-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-green-300 hover:shadow-md"
+  >
+    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-2xl">
+      🛍️
+    </div>
+
+    <h3 className="mt-5 text-lg font-black text-blue-950">
+      My Products
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-slate-600">
+      Manage the products you're selling on ZIMBILLBOARDS MEDIA.
+    </p>
+
+    <div className="mt-5 text-sm font-black text-green-700">
+      Manage products →
+    </div>
+
+    {sellerSubscription.expiresAt && (
+      <p className="mt-2 text-xs font-bold text-slate-400">
+        Membership expires{" "}
+        {formatDate(sellerSubscription.expiresAt)}
+      </p>
+    )}
+  </Link>
+) : sellerSubscription?.status === "pending" ? (
+  <Link
+    href="/advertiser/seller"
+    className="group rounded-2xl border border-amber-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-md"
+  >
+    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-2xl">
+      ⏳
+    </div>
+
+    <h3 className="mt-5 text-lg font-black text-blue-950">
+      Seller Application
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-slate-600">
+      Your $50 seller membership payment is currently under review.
+    </p>
+
+    <div className="mt-5 text-sm font-black text-amber-700">
+      View application →
+    </div>
+  </Link>
+) : (
+  <Link
+    href="/advertiser/seller"
+    className="group rounded-2xl border border-blue-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-md"
+  >
+    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-2xl">
+      🛍️
+    </div>
+
+    <h3 className="mt-5 text-lg font-black text-blue-950">
+      Sell on ZIMBILLBOARDS MEDIA
+    </h3>
+
+    <p className="mt-2 text-sm leading-6 text-slate-600">
+      Become a seller and list your products on our Zimbabwe marketplace.
+    </p>
+
+    <div className="mt-5 text-sm font-black text-blue-700">
+      Become a seller →
+    </div>
+  </Link>
+)}
           </div>
         </section>
 
@@ -796,24 +1108,27 @@ export default function AdvertiserDashboard() {
       }}
     />
   ) : (
-    <img
-      src={ad.mediaUrl}
-      alt={ad.title}
-      className="h-full w-full object-cover"
-      onError={(event) => {
-        console.error(
-          "Advertisement image failed to load:",
-          ad.mediaUrl,
-          event
-        );
-      }}
-      onLoad={() => {
-        console.log(
-          "Advertisement image loaded:",
-          ad.mediaUrl
-        );
-      }}
-    />
+  <img
+  src={
+    ad.mediaUrl.startsWith("http")
+      ? ad.mediaUrl
+      : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/advertisements/${ad.mediaUrl.replace(/^\/+/, "")}`
+  }
+  alt={ad.title}
+  className="h-full w-full object-cover"
+  onError={(event) => {
+    console.error(
+      "Advertisement image failed to load:",
+      event.currentTarget.src
+    );
+  }}
+  onLoad={(event) => {
+    console.log(
+      "Advertisement image loaded:",
+      event.currentTarget.src
+    );
+  }}
+/>
   )}
 </div>
 </td>
